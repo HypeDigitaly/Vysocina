@@ -4,6 +4,8 @@
 
 .vfrc-widget--chat {
   animation: fadeInChat 1s ease-out;
+  border: 1px solid #2e8600;
+  border-radius: 20px;
 }
 
 .vfrc-assistant-info--title.c-kfyIxT {
@@ -314,5 +316,6 @@ textarea#vf-chat-input--cm50wq9jx0001356rbFr26w1p {
     border-radius: 20px;
     height: 85vh !important;
     max-height: 900px !important;
+    border: 1px solid #2e8600;
   }
 }
