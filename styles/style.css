@@ -2,7 +2,7 @@
   box-shadow: #000000;
 }
 
-.vfrc-widget--chat.c-jmjhPs {
+.vfrc-widget--chat {
   animation: fadeInChat 1s ease-out;
 }
 
@@ -23,7 +23,7 @@
 .c-kIbiaN-iiTsXc-size-large {
   width: 72px;
   height: 72px;
-  background-color: #0FC4F2;
+  background-color: #2e8600;
   border: #000000 1px solid;
 }
 
@@ -55,7 +55,7 @@
 }
 
 .c-PJLV-gJqBfM-from-user {
-  background-color: #0FC4F2;
+  background-color: #2e8600;
   color: #ffffff;
   text-align: left !important;
   width: auto !important;
@@ -70,26 +70,28 @@
   display: inline-block !important;
 }
 
-.vfrc-header.c-iCDrnV {
+.vfrc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  background-color: #0FC4F2;
+  background-color: #2e8600;
   height: 66px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
 
-.vfrc-header.c-iCDrnV .vfrc-avatar {
+.vfrc-header .vfrc-avatar {
   position: absolute;
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.c-iCDrnV .c-kfyIxT {
+.vfrc-header .vfrc-header--title {
   margin: 0px 0px 0px 55px;
+  color: #fffffffa;
+  font-size: 16px;
 }
 
 .c-dzcdPv .vfrc-header--button {
@@ -122,11 +124,11 @@
 }
 
 .c-bXTvXv-lckiv-type-info {
-  background-color: #0FC4F2;
+  background-color: #2e8600;
 }
 
 .c-bXTvXv-lckiv-type-info:hover {
-  background-color: #0FC4F2;
+  background-color: #2e8600;
 }
 
 .vfrc-message {
@@ -145,7 +147,7 @@
   display: inline-block !important;
   width: fit-content !important;
   max-width: calc(100% - 20px) !important;
-  border: 1px solid #0FC4F2;
+  border: 1px solid #2e8600;
   font-size: 13px;
   font-weight: 500;
   border-radius: 20px;
@@ -203,17 +205,15 @@
   font-weight: 700;
 }
 
-.vfrc-launcher.c-bQoszf {
+.vfrc-launcher {
   width: 80px;
   height: 80px;
   background-color: white;
-  border: #0FC4F2 4px solid;
   animation: fadeIn 0.5s ease-in-out;
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
-  box-shadow: #000000;
 }
 
-.vfrc-launcher.c-bQoszf:hover {
+.vfrc-launcher:hover {
   transform: scale(1.1);
   opacity: 0.9;
   background-color: #f5f5f5;
@@ -234,14 +234,14 @@
   font-size: 12px;
   font-weight: 700;
   line-height: 17px;
-  color: #0FC4F2 !important;
+  color: #2e8600 !important;
 }
 
 .c-cejRNw *,
 .c-cejRNw a,
 .vfrc-footer--watermark *,
 .vfrc-footer--watermark a {
-  color: #0FC4F2 !important;
+  color: #2e8600 !important;
   font-weight: 700 !important;
   text-decoration: none;
 }
