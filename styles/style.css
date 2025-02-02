@@ -6,8 +6,8 @@
 
 /* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 84px !important;  /* Reduced by 30% from 120px */
-  height: 84px !important; /* Reduced by 30% from 120px */
+  width: 84px !important;
+  height: 84px !important;
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -27,19 +27,30 @@
 
 /* The actual image within the launcher */
 .ojsd7it.ojsd7iv.ojsd7ig {
-  width: 84px !important;  /* Reduced by 30% from 120px */
-  height: 84px !important; /* Reduced by 30% from 120px */
-  border-radius: 42px !important; /* Half of width/height */
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 42px !important;
   border: none !important;
   box-shadow: none !important;
 }
 
 /* Styles for opened state */
 .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
-  width: 48px !important;  /* Much smaller when opened */
-  height: 48px !important; /* Much smaller when opened */
-  background-color: #4CAF50 !important; /* Keeping the green background */
-  border-radius: 24px !important;
+  width: 36px !important;  /* Further reduced size */
+  height: 36px !important;
+  background-color: #4CAF50 !important;
+  border-radius: 18px !important;
+  position: absolute !important;
+  bottom: 20px !important;
+  right: 20px !important;
+}
+
+/* Arrow styling in opened state */
+.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) svg {
+  width: 18px !important;  /* 25% smaller arrow */
+  height: 18px !important;
+  fill: rgba(255, 255, 255, 0.8) !important;  /* Lighter color for the arrow */
+  opacity: 0.9 !important;
 }
 
 /* Fade in animation */
