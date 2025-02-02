@@ -4,18 +4,22 @@
   right: 30px !important;
 }
 
-/* Button container */
+/* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 80px !important;  /* Increased from original */
-  height: 80px !important; /* Increased from original */
-  background-color: transparent !important;
-  border: none !important;
-  animation: fadeIn 0.5s ease-in-out;
+  width: 120px !important;  /* Increased from original */
+  height: 120px !important; /* Increased from original */
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Launcher hover effects */
-.vfrc-launcher.ojsd7i1:hover {
+/* Only apply transparent background when launcher is closed (image is visible) */
+.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Launcher hover effects - only when closed */
+.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
   transform: scale(1.1);
   opacity: 0.9;
   background-color: transparent !important;
