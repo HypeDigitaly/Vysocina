@@ -6,38 +6,43 @@
 
 /* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 64px !important;  /* Upraveno pro lepší zarovnání */
-  height: 64px !important;
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
   animation: fadeIn 0.5s ease-in-out;
-  background-color: #6BBE44 !important; /* Přizpůsobení zelené barvy widgetu */
-  border-radius: 50% !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* Zarovnání šipky správně k widgetu */
-.vfrc-launcher.ojsd7i1 {
-  position: fixed;
-  bottom: 32px !important; /* Drobné upravení pozice */
-  right: 40px !important; /* Přesně srovnané k pravé straně widgetu */
+/* Only apply transparent background when launcher is closed (image is visible) */
+.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
+  background-color: transparent !important;
+  border: none !important;
 }
 
-/* Hover efekt */
-.vfrc-launcher.ojsd7i1:hover {
+/* Launcher hover effects - only when closed */
+.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
   transform: scale(1.1);
   opacity: 0.9;
+  background-color: transparent !important;
 }
 
-/* Šipka uvnitř tlačítka */
-.vfrc-launcher.ojsd7i1 svg {
-  width: 24px !important;
-  height: 24px !important;
-  fill: white !important; /* Bílá barva šipky */
+/* The actual image within the launcher */
+.ojsd7it.ojsd7iv.ojsd7ig {
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
+  border-radius: 42px !important; /* Half of width/height */
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* Fade in animace */
+/* Styles for opened state */
+.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
+  width: 48px !important;  /* Much smaller when opened */
+  height: 48px !important; /* Much smaller when opened */
+  background-color: #4CAF50 !important; /* Keeping the green background */
+  border-radius: 24px !important;
+}
+
+/* Fade in animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
