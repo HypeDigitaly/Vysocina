@@ -1,13 +1,13 @@
 /* Main container positioning */
 ._1emja3f9 {
-  bottom: 20px !important;
-  right: 20px !important;
+  bottom: 30px !important;
+  right: 30px !important;
 }
 
 /* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 64px !important;  /* Adjusted to match screenshot */
-  height: 64px !important;
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -20,40 +20,26 @@
 
 /* Launcher hover effects - only when closed */
 .vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
-  transform: scale(1.05);
-  opacity: 0.95;
+  transform: scale(1.1);
+  opacity: 0.9;
   background-color: transparent !important;
 }
 
 /* The actual image within the launcher */
 .ojsd7it.ojsd7iv.ojsd7ig {
-  width: 64px !important;
-  height: 64px !important;
-  border-radius: 32px !important;
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
+  border-radius: 42px !important; /* Half of width/height */
   border: none !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: none !important;
 }
 
 /* Styles for opened state */
 .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
-  width: 48px !important;
-  height: 48px !important;
-  background-color: #76B82A !important;  /* Matched to screenshot's green */
+  width: 48px !important;  /* Much smaller when opened */
+  height: 48px !important; /* Much smaller when opened */
+  background-color: #4CAF50 !important; /* Keeping the green background */
   border-radius: 24px !important;
-  position: absolute !important;
-  bottom: 24px !important;
-  right: 24px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Arrow styling in opened state */
-.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) svg {
-  width: 20px !important;
-  height: 20px !important;
-  fill: rgba(255, 255, 255, 0.95) !important;
-  opacity: 1 !important;
-  padding: 0 !important;
-  margin: 0 !important;
 }
 
 /* Fade in animation */
