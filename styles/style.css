@@ -6,8 +6,8 @@
 
 /* Button container */
 .vfrc-launcher.ojsd7i1 {
-  width: 120px !important;  /* Increased from original */
-  height: 120px !important; /* Increased from original */
+  width: 80px !important;  /* Increased from original */
+  height: 80px !important; /* Increased from original */
   background-color: transparent !important;
   border: none !important;
   animation: fadeIn 0.5s ease-in-out;
