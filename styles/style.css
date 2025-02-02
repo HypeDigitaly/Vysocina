@@ -6,8 +6,8 @@
 
 /* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 120px !important;  /* Increased from original */
-  height: 120px !important; /* Increased from original */
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -27,11 +27,19 @@
 
 /* The actual image within the launcher */
 .ojsd7it.ojsd7iv.ojsd7ig {
-  width: 120px !important;
-  height: 120px !important;
-  border-radius: 60px !important;
+  width: 84px !important;  /* Reduced by 30% from 120px */
+  height: 84px !important; /* Reduced by 30% from 120px */
+  border-radius: 42px !important; /* Half of width/height */
   border: none !important;
   box-shadow: none !important;
+}
+
+/* Styles for opened state */
+.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
+  width: 48px !important;  /* Much smaller when opened */
+  height: 48px !important; /* Much smaller when opened */
+  background-color: #4CAF50 !important; /* Keeping the green background */
+  border-radius: 24px !important;
 }
 
 /* Fade in animation */
