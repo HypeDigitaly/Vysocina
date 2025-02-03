@@ -3,45 +3,41 @@
   bottom: 30px !important;
   right: 30px !important;
 }
-
 /* Button container - default state (when closed) */
 .vfrc-launcher.ojsd7i1 {
-  width: 84px !important;  /* Reduced by 30% from 120px */
-  height: 84px !important; /* Reduced by 30% from 120px */
+  width: 84px !important;
+  height: 84px !important;
   transition: transform 150ms ease 0s, opacity 150ms ease 0s !important;
   animation: fadeIn 0.5s ease-in-out;
 }
-
 /* Only apply transparent background when launcher is closed (image is visible) */
 .vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
   background-color: transparent !important;
   border: none !important;
 }
-
 /* Launcher hover effects - only when closed */
 .vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
   transform: scale(1.1);
   opacity: 0.9;
   background-color: transparent !important;
 }
-
 /* The actual image within the launcher */
 .ojsd7it.ojsd7iv.ojsd7ig {
-  width: 84px !important;  /* Reduced by 30% from 120px */
-  height: 84px !important; /* Reduced by 30% from 120px */
-  border-radius: 42px !important; /* Half of width/height */
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 42px !important;
   border: none !important;
   box-shadow: none !important;
 }
-
-/* Styles for opened state */
+/* Styles for opened state - MODIFIED */
 .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
-  width: 48px !important;  /* Much smaller when opened */
-  height: 48px !important; /* Much smaller when opened */
-  background-color: #4CAF50 !important; /* Keeping the green background */
-  border-radius: 24px !important;
+  width: 40px !important;  /* Reduced from 48px */
+  height: 40px !important; /* Reduced from 48px */
+  background-color: #4CAF50 !important;
+  border-radius: 20px !important;
+  right: 20px !important;  /* Added to align with widget above */
+  position: relative !important; /* Added to ensure positioning works */
 }
-
 /* Fade in animation */
 @keyframes fadeIn {
   from {
