@@ -31,21 +31,48 @@
 }
 /* Styles for opened state - MODIFIED */
 .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
-  width: 44px !important;
-  height: 44px !important;
-  background-color: #6EBC43 !important; /* Matched the color from Image 2 */
-  border-radius: 50% !important; /* Ensures perfect roundness */
-  margin-right: -10px !important; /* Moves it more to the right */
+  width: 42px !important;
+  height: 42px !important;
+  background-color: #6EBC43 !important;
+  border-radius: 9999px !important; /* Ensures perfect circle */
+  margin-right: -10px !important;
   position: relative !important;
+  overflow: hidden !important; /* Helps maintain perfect circle */
 }
-/* Fade in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+/* Disable animations on mobile */
+@media (max-width: 768px) {
+  .vfrc-launcher.ojsd7i1 {
+    transition: none !important;
+    animation: none !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
+    transition: none !important;
+    animation: none !important;
+  }
+  /* Remove any transform animations */
+  .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  /* Remove fade animation */
+  @keyframes fadeIn {
+    from, to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+/* Keep fade in animation for desktop only */
+@media (min-width: 769px) {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
