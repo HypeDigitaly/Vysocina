@@ -31,12 +31,12 @@
 }
 /* Styles for opened state - MODIFIED */
 .vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
-  width: 40px !important;  /* Reduced from 48px */
-  height: 40px !important; /* Reduced from 48px */
-  background-color: #4CAF50 !important;
-  border-radius: 20px !important;
-  right: 20px !important;  /* Added to align with widget above */
-  position: relative !important; /* Added to ensure positioning works */
+  width: 44px !important;
+  height: 44px !important;
+  background-color: #6EBC43 !important; /* Matched the color from Image 2 */
+  border-radius: 50% !important; /* Ensures perfect roundness */
+  margin-right: -10px !important; /* Moves it more to the right */
+  position: relative !important;
 }
 /* Fade in animation */
 @keyframes fadeIn {
