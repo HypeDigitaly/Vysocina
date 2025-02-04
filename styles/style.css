@@ -83,9 +83,21 @@ button[label="Cancel"]::before {
   z-index: 2 !important;
 }
 
-/* Message text left alignment */
-._7rpFil1_7rpfile_7rpfilc {
+/* Message text alignment */
+.vfrc-message {
+  text-align: left !important;
+  justify-content: flex-start !important;
+}
+
+/* Ensure message content is also left-aligned */
+.vfrc-message > * {
   text-align: left !important;
   margin-left: 0 !important;
+}
+
+/* In case there are any flex containers within the message */
+.vfrc-message div {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
 }
 
