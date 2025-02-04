@@ -130,7 +130,7 @@ button[label="Cancel"]::before {
   align-items: flex-start !important;
 }
 
-/* Translation for "Chat has ended" text */
+/* Aktualizovaný styl pro "Chat has ended" text */
 div[class*="1o69oyc2"] {
   color: transparent !important;
   position: relative !important;
@@ -142,10 +142,13 @@ div[class*="1o69oyc2"]::before {
   left: 0 !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  color: #666 !important;
+  color: #666666 !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
-  font-family: Arial, sans-serif !important;
-  font-size: 16px !important;
+  font-family: "Open Sans", Arial, sans-serif !important;
+  font-size: 14px !important;  /* Zmenšená velikost písma */
+  font-weight: 400 !important; /* Normální tloušťka písma */
+  line-height: 1.5 !important;
+  letter-spacing: normal !important;
 }
