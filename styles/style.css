@@ -57,8 +57,9 @@ button[label="Cancel"] {
   position: relative !important;
 }
 
-/* Start new chat translation */
-button[label="Start new chat"]::before {
+/* Start new chat translation - both button variations */
+button[label="Start new chat"]::before,
+button#vfrc-start-chat::before {
   content: "Začít nový chat" !important;
   position: absolute !important;
   left: 50% !important;
