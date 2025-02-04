@@ -49,35 +49,36 @@
 }
 
 /* Translation overlay styles */
-.vfrc-button.lytjiy0_l7qb7gk0_lytjiv2_lytjiv4 {
+/* Hide original button text */
+.vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4,
+button[label="Start new chat"],
+button[label="Cancel"] {
+  color: transparent !important;
   position: relative !important;
 }
 
-/* Hide original text while keeping it in DOM */
-.vfrc-button.lytjiy0_l7qb7gk0_lytjiv2_lytjiv4 span {
-  opacity: 0 !important;
-}
-
-/* Translation for "Start new chat" button */
-button[label="Start new chat"]::after {
+/* Start new chat translation */
+button[label="Start new chat"]::before {
   content: "Začít nový chat" !important;
   position: absolute !important;
   left: 50% !important;
   top: 50% !important;
   transform: translate(-50%, -50%) !important;
+  color: white !important;
   white-space: nowrap !important;
   pointer-events: none !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
 }
 
-/* Translation for "Cancel" button */
-button[label="Cancel"]::after {
+/* Cancel translation */
+button[label="Cancel"]::before {
   content: "Zavřít" !important;
   position: absolute !important;
   left: 50% !important;
   top: 50% !important;
   transform: translate(-50%, -50%) !important;
+  color: #666 !important;
   white-space: nowrap !important;
   pointer-events: none !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
 }
