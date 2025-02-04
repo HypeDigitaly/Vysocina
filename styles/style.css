@@ -82,3 +82,10 @@ button[label="Cancel"]::before {
   pointer-events: none !important;
   z-index: 2 !important;
 }
+
+/* Message text left alignment */
+._7rpFil1_7rpfile_7rpfilc {
+  text-align: left !important;
+  margin-left: 0 !important;
+}
+
