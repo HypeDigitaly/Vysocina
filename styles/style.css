@@ -134,21 +134,25 @@ button[label="Cancel"]::before {
 div[class*="1o69oyc2"] {
   color: transparent !important;
   position: relative !important;
+  text-align: center !important;  /* Přidáno pro centrování */
+  width: 100% !important;  /* Zajistí plnou šířku pro centrování */
 }
 
 div[class*="1o69oyc2"]::before {
   content: "Chat byl ukončen" !important;
   position: absolute !important;
-  left: 0 !important;
+  left: 50% !important;  /* Změněno z left: 0 na left: 50% */
   top: 50% !important;
-  transform: translateY(-50%) !important;
+  transform: translate(-50%, -50%) !important;  /* Přidáno -50% v ose X pro přesné centrování */
   color: #666666 !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
   font-family: "Open Sans", Arial, sans-serif !important;
-  font-size: 14px !important;  /* Zmenšená velikost písma */
-  font-weight: 400 !important; /* Normální tloušťka písma */
+  font-size: 14px !important;
+  font-weight: 600 !important;  /* Změněno na tučné písmo */
   line-height: 1.5 !important;
   letter-spacing: normal !important;
+  display: block !important;  /* Přidáno pro lepší centrování */
+  text-align: center !important;  /* Přidáno pro centrování */
 }
