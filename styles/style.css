@@ -48,18 +48,36 @@
   transform: none !important;
 }
 
-/* Translation overlay styles */
-/* Hide original button text */
+/* Translation overlay styles - updated approach */
+/* Remove backgrounds and hide original text */
 .vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4,
 button[label="Start new chat"],
-button[label="Cancel"] {
+button[label="Cancel"],
+#vfrc-start-chat {
+  background: transparent !important;
+  border: none !important;
   color: transparent !important;
   position: relative !important;
 }
 
-/* Start new chat translation - both button variations */
+/* Hide all original text contents */
+.vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4 span,
+button[label="Start new chat"] span,
+button[label="Cancel"] span,
+#vfrc-start-chat span {
+  display: none !important;
+}
+
+/* Start new chat translation - all variations */
+button[label="Start new chat"],
+#vfrc-start-chat {
+  background-color: #6EBC43 !important;
+  border-radius: 4px !important;
+  padding: 10px 20px !important;
+}
+
 button[label="Start new chat"]::before,
-button#vfrc-start-chat::before {
+#vfrc-start-chat::before {
   content: "Začít nový chat" !important;
   position: absolute !important;
   left: 50% !important;
@@ -69,9 +87,17 @@ button#vfrc-start-chat::before {
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 16px !important;
 }
 
 /* Cancel translation */
+button[label="Cancel"] {
+  background-color: #f5f5f5 !important;
+  border-radius: 4px !important;
+  padding: 10px 20px !important;
+}
+
 button[label="Cancel"]::before {
   content: "Zavřít" !important;
   position: absolute !important;
@@ -82,6 +108,8 @@ button[label="Cancel"]::before {
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 16px !important;
 }
 
 /* Message text alignment */
@@ -101,4 +129,3 @@ button[label="Cancel"]::before {
   justify-content: flex-start !important;
   align-items: flex-start !important;
 }
-
