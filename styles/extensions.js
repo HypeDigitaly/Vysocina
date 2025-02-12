@@ -135,15 +135,11 @@ export const BrowserDataExtension = {
 
     const calculateFingerprint = (data) => {
       try {
-        // Network identifier
-        const networkId = data.ip_address;
-        
-        // Hardware-specific identifiers (highest importance - most stable across browsers)
+        // Hardware-specific identifiers (nejvyšší váha - nejstabilnější)
         const hardwareId = [
           data.os,
           data.osVersion,
           data.deviceVendor,
-          data.cpu,
           data.processors,
           data.memory || 'unknown',
           `${data.screen.width}x${data.screen.height}`,
@@ -152,19 +148,15 @@ export const BrowserDataExtension = {
           data.platform
         ].join('::');
 
-        // Browser-specific identifiers (lower importance - changes with different browsers)
+        // Browser core identifiers (pouze stabilní části prohlížeče)
         const browserId = [
           data.browser,
-          data.browserVersion,
           data.engine,
-          data.engineVersion,
-          data.currentResolution,
-          data.availableResolution
+          data.platform
         ].join('::');
-        
-        // User environment (lowest importance)
+
+        // System environment (stabilní systémové informace)
         const envId = [
-          data.language,
           data.systemLanguage,
           data.timezone,
           data.type
@@ -176,12 +168,11 @@ export const BrowserDataExtension = {
           return hash.repeat(weight);
         };
 
-        // Combine components with different weights
+        // Změna vah pro větší stabilitu
         const components = [
-          getWeightedComponent(networkId, 1),     // IP gets low weight
-          getWeightedComponent(hardwareId, 4),    // Hardware gets highest weight
-          getWeightedComponent(browserId, 1),     // Browser info gets low weight
-          getWeightedComponent(envId, 1)          // Environment gets low weight
+          getWeightedComponent(hardwareId, 8),     // Hardware gets very high weight
+          getWeightedComponent(browserId, 2),      // Browser core info gets medium weight
+          getWeightedComponent(envId, 2)           // Stable environment info gets medium weight
         ].join('||');
         
         return hashString(components);
