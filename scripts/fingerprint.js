@@ -125,6 +125,11 @@ class StableDeviceFingerprint {
         };
     }
 
+    // Browser language detection
+    getBrowserLanguage() {
+        return navigator.language || navigator.userLanguage || "Unknown";
+    }
+
     // Calculate stable device fingerprint
     calculateFingerprint() {
         // Collect stable components
@@ -166,7 +171,8 @@ class StableDeviceFingerprint {
             device: this.getDevice(),
             deviceType: this.getDeviceType(),
             hardwareFeatures: this.getHardwareFeatures(),
-            isMobile: this.isMobile()
+            isMobile: this.isMobile(),
+            browserLanguage: this.getBrowserLanguage() // Added browser language as component
         };
 
         // Log all components for debugging
@@ -180,6 +186,7 @@ class StableDeviceFingerprint {
         console.log("- Device Type:", components.deviceType);
         console.log("- Hardware Features:", components.hardwareFeatures);
         console.log("- Is Mobile:", components.isMobile);
+        console.log("- Browser Language:", components.browserLanguage);
 
         return components;
     }
