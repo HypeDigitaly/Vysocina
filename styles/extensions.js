@@ -135,7 +135,7 @@ export const BrowserDataExtension = {
 
     const calculateFingerprint = (data) => {
       try {
-        // Hardware-specific identifiers (nejvyšší váha - nejstabilnější)
+        // Hardware-specific identifiers (pouze skutečně stabilní hardware údaje)
         const hardwareId = [
           data.os,
           data.osVersion,
@@ -144,22 +144,19 @@ export const BrowserDataExtension = {
           data.memory || 'unknown',
           `${data.screen.width}x${data.screen.height}`,
           data.screen.colorDepth,
-          data.screen.pixelRatio,
           data.platform
         ].join('::');
 
-        // Browser core identifiers (pouze stabilní části prohlížeče)
+        // Browser core identifiers (pouze nejstabilnější části)
         const browserId = [
           data.browser,
-          data.engine,
-          data.platform
+          data.engine
         ].join('::');
 
-        // System environment (stabilní systémové informace)
+        // System environment (minimální set systémových informací)
         const envId = [
-          data.systemLanguage,
-          data.timezone,
-          data.type
+          data.type,
+          data.os
         ].join('::');
 
         // Calculate weights for the final hash
@@ -168,11 +165,11 @@ export const BrowserDataExtension = {
           return hash.repeat(weight);
         };
 
-        // Změna vah pro větší stabilitu
+        // Ještě větší důraz na hardware
         const components = [
-          getWeightedComponent(hardwareId, 8),     // Hardware gets very high weight
-          getWeightedComponent(browserId, 2),      // Browser core info gets medium weight
-          getWeightedComponent(envId, 2)           // Stable environment info gets medium weight
+          getWeightedComponent(hardwareId, 10),    // Hardware gets even higher weight
+          getWeightedComponent(browserId, 1),      // Browser info gets minimal weight
+          getWeightedComponent(envId, 1)           // Environment gets minimal weight
         ].join('||');
         
         return hashString(components);
