@@ -1,126 +1,233 @@
 // fingerprint.js
-export const generateFingerprint = () => {
-    // Hash function that converts a string into a number
-    const hashString = (str) => {
+class ComprehensiveBrowserFingerprint {
+    constructor() {
+        this.components = [];
+        this.userAgent = navigator.userAgent;
+        this.platform = navigator.platform;
+    }
+
+    getUserAgent() {
+        return this.userAgent;
+    }
+
+    getBrowser() {
+        const ua = this.userAgent;
+        if (ua.includes("Chrome")) return "Chrome";
+        if (ua.includes("Firefox")) return "Firefox";
+        if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
+        if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+        if (ua.includes("Edge")) return "Edge";
+        if (ua.includes("MSIE") || ua.includes("Trident/")) return "Internet Explorer";
+        return "Unknown";
+    }
+
+    getBrowserVersion() {
+        const ua = this.userAgent;
+        const browser = this.getBrowser();
+        let match;
+
+        switch (browser) {
+            case "Chrome":
+                match = ua.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/);
+                break;
+            case "Firefox":
+                match = ua.match(/Firefox\/(\d+\.\d+)/);
+                break;
+            case "Safari":
+                match = ua.match(/Version\/(\d+\.\d+\.\d+)/);
+                break;
+            case "Opera":
+                match = ua.match(/OPR\/(\d+\.\d+\.\d+)/);
+                break;
+            case "Edge":
+                match = ua.match(/Edge\/(\d+\.\d+\.\d+)/);
+                break;
+            case "Internet Explorer":
+                match = ua.match(/MSIE (\d+\.\d+)/);
+                break;
+        }
+
+        return match ? match[1] : "Unknown";
+    }
+
+    getEngine() {
+        const ua = this.userAgent;
+        if (ua.includes("Gecko/")) return "Gecko";
+        if (ua.includes("AppleWebKit")) return "WebKit";
+        if (ua.includes("Trident/")) return "Trident";
+        if (ua.includes("Presto/")) return "Presto";
+        return "Unknown";
+    }
+
+    getEngineVersion() {
+        const ua = this.userAgent;
+        const engine = this.getEngine();
+        let match;
+
+        switch (engine) {
+            case "WebKit":
+                match = ua.match(/AppleWebKit\/(\d+\.\d+)/);
+                break;
+            case "Gecko":
+                match = ua.match(/rv:(\d+\.\d+)/);
+                break;
+            case "Trident":
+                match = ua.match(/Trident\/(\d+\.\d+)/);
+                break;
+            case "Presto":
+                match = ua.match(/Presto\/(\d+\.\d+)/);
+                break;
+        }
+
+        return match ? match[1] : "Unknown";
+    }
+
+    getOS() {
+        const ua = this.userAgent;
+        if (ua.includes("Windows")) return "Windows";
+        if (ua.includes("Mac OS X")) return "Mac OS X";
+        if (ua.includes("Linux")) return "Linux";
+        if (ua.includes("Android")) return "Android";
+        if (ua.includes("iOS")) return "iOS";
+        if (ua.includes("Ubuntu")) return "Ubuntu";
+        return "Unknown";
+    }
+
+    getOSVersion() {
+        const ua = this.userAgent;
+        const os = this.getOS();
+        let match;
+
+        switch (os) {
+            case "Windows":
+                match = ua.match(/Windows NT (\d+\.\d+)/);
+                break;
+            case "Mac OS X":
+                match = ua.match(/Mac OS X (\d+[._]\d+[._]\d+)/);
+                break;
+            case "Android":
+                match = ua.match(/Android (\d+\.\d+)/);
+                break;
+            case "iOS":
+                match = ua.match(/OS (\d+_\d+)/);
+                break;
+        }
+
+        return match ? match[1].replace(/_/g, '.') : "Unknown";
+    }
+
+    getDevice() {
+        const ua = this.userAgent;
+        if (ua.includes("iPhone")) return "iPhone";
+        if (ua.includes("iPad")) return "iPad";
+        if (ua.includes("Android")) return "Android Device";
+        return "Desktop";
+    }
+
+    getDeviceType() {
+        const ua = this.userAgent;
+        if (ua.includes("Mobile")) return "Mobile";
+        if (ua.includes("Tablet")) return "Tablet";
+        return "Desktop";
+    }
+
+    getDeviceVendor() {
+        const ua = this.userAgent;
+        if (ua.includes("iPhone") || ua.includes("iPad")) return "Apple";
+        if (ua.includes("Samsung")) return "Samsung";
+        if (ua.includes("Huawei")) return "Huawei";
+        if (ua.includes("Pixel")) return "Google";
+        return "Unknown";
+    }
+
+    getCPU() {
+        const ua = this.userAgent;
+        if (ua.includes("x64") || ua.includes("x86_64")) return "x64";
+        if (ua.includes("x86") || ua.includes("i686")) return "x86";
+        if (ua.includes("arm")) return "ARM";
+        return "Unknown";
+    }
+
+    getCurrentResolution() {
+        return `${window.screen.width}x${window.screen.height}`;
+    }
+
+    getAvailableResolution() {
+        return `${window.screen.availWidth}x${window.screen.availHeight}`;
+    }
+
+    getTimeZone() {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    getLanguage() {
+        return navigator.language || navigator.userLanguage || "Unknown";
+    }
+
+    getSystemLanguage() {
+        return navigator.language || "Unknown";
+    }
+
+    calculateFingerprint() {
+        this.components = [
+            this.getUserAgent(),
+            this.getBrowser(),
+            this.getBrowserVersion(),
+            this.getEngine(),
+            this.getEngineVersion(),
+            this.getOS(),
+            this.getOSVersion(),
+            this.getDevice(),
+            this.getDeviceType(),
+            this.getDeviceVendor(),
+            this.getCPU(),
+            this.getCurrentResolution(),
+            this.getAvailableResolution(),
+            this.getTimeZone(),
+            this.getLanguage(),
+            this.getSystemLanguage()
+        ];
+
+        const componentsStr = this.components.join('###');
+        return this.generateHash(componentsStr);
+    }
+
+    generateHash(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char; // hash * 31 + char
-            hash = hash & hash; // Convert to 32-bit integer
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
         }
-        return Math.abs(hash).toString(36); // Convert to base36 for shorter string
-    };
+        return Math.abs(hash);
+    }
 
-    // Collect system information
-    const getSystemInfo = () => {
-        const userAgent = navigator.userAgent;
-        let os = "Unknown";
-        let osVersion = "Unknown";
-        let deviceType = "desktop";
-        let deviceVendor = "";
-
-        // Detect OS and version
-        if (userAgent.includes("Win")) {
-            os = "Windows";
-            osVersion = userAgent.match(/Windows NT ([\d.]+)/)?.[1] || "Unknown";
-        } else if (userAgent.includes("Mac")) {
-            os = "MacOS";
-            osVersion = userAgent.match(/Mac OS X ([\d._]+)/)?.[1]?.replace(/_/g, '.') || "Unknown";
-        } else if (userAgent.includes("Linux")) {
-            os = "Linux";
-        } else if (userAgent.includes("Android")) {
-            os = "Android";
-            osVersion = userAgent.match(/Android ([\d.]+)/)?.[1] || "Unknown";
-        } else if (userAgent.includes("iOS")) {
-            os = "iOS";
-            osVersion = userAgent.match(/OS ([\d_]+)/)?.[1]?.replace(/_/g, '.') || "Unknown";
-        }
-
-        // Detect device type
-        if (/Mobi|Android|iPhone|iPad|Windows Phone/i.test(userAgent)) {
-            deviceType = "mobile";
-            if (/iPad|Android(?!.*Mobile)/i.test(userAgent)) {
-                deviceType = "tablet";
-            }
-        }
-
-        // Detect device vendor
-        if (userAgent.includes("iPhone") || userAgent.includes("iPad")) {
-            deviceVendor = "Apple";
-        } else if (userAgent.includes("Samsung")) {
-            deviceVendor = "Samsung";
-        } else if (userAgent.includes("Huawei")) {
-            deviceVendor = "Huawei";
-        } else {
-            deviceVendor = navigator.vendor || "Unknown";
-        }
-
+    getAllComponents() {
         return {
-            type: deviceType,
-            os,
-            osVersion,
-            deviceVendor,
-            platform: navigator.platform,
-            processors: navigator.hardwareConcurrency || 1,
-            memory: navigator?.deviceMemory || null,
-            screen: {
-                width: window.screen.width,
-                height: window.screen.height,
-                colorDepth: window.screen.colorDepth,
-                pixelRatio: window.devicePixelRatio || 1
-            }
+            userAgent: this.getUserAgent(),
+            browser: this.getBrowser(),
+            browserVersion: this.getBrowserVersion(),
+            engine: this.getEngine(),
+            engineVersion: this.getEngineVersion(),
+            os: this.getOS(),
+            osVersion: this.getOSVersion(),
+            device: this.getDevice(),
+            deviceType: this.getDeviceType(),
+            deviceVendor: this.getDeviceVendor(),
+            cpu: this.getCPU(),
+            currentResolution: this.getCurrentResolution(),
+            availableResolution: this.getAvailableResolution(),
+            timeZone: this.getTimeZone(),
+            language: this.getLanguage(),
+            systemLanguage: this.getSystemLanguage()
         };
+    }
+}
+
+export const generateFingerprint = () => {
+    const fingerprinter = new ComprehensiveBrowserFingerprint();
+    return {
+        fingerprint: fingerprinter.calculateFingerprint(),
+        components: fingerprinter.getAllComponents()
     };
-
-    // Calculate the actual fingerprint
-    const calculateFingerprint = (data) => {
-        try {
-            // Hardware identifier - combines stable hardware characteristics
-            const hardwareId = [
-                data.os,                     // Operating system name
-                data.osVersion,              // OS version
-                data.deviceVendor,           // Device manufacturer
-                data.processors,             // Number of CPU cores
-                data.memory || 'unknown',    // Amount of RAM
-                `${data.screen.width}x${data.screen.height}`, // Screen resolution
-                data.screen.colorDepth,      // Color depth
-                data.platform                // System platform
-            ].join('::');
-
-            // Browser identifier - basic browser info
-            const browserId = [
-                navigator.userAgent,         // Browser user agent
-                navigator.language           // Browser language
-            ].join('::');
-
-            // Environment identifier - system environment
-            const envId = [
-                data.type,                   // Device type (desktop/mobile/tablet)
-                data.os                      // OS name
-            ].join('::');
-
-            // Weight different components (hardware gets highest weight)
-            const getWeightedComponent = (component, weight) => {
-                const hash = hashString(component);
-                return hash.repeat(weight);  // Repeat hash string to increase its influence
-            };
-
-            // Combine all components with weights
-            const components = [
-                getWeightedComponent(hardwareId, 10),  // Hardware gets highest weight (10)
-                getWeightedComponent(browserId, 1),    // Browser gets normal weight (1)
-                getWeightedComponent(envId, 1)         // Environment gets normal weight (1)
-            ].join('||');
-            
-            // Generate final fingerprint
-            return hashString(components);
-        } catch (error) {
-            console.error('Error calculating fingerprint:', error);
-            return 'X';
-        }
-    };
-
-    // Generate and return the fingerprint
-    const systemInfo = getSystemInfo();
-    return calculateFingerprint(systemInfo);
 };
