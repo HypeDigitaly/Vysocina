@@ -5,17 +5,6 @@ export const BrowserDataExtension = {
     trace.type === "ext_browserData" || 
     trace.payload?.name === "ext_browserData",
   effect: async ({ trace }) => {
-    // Simple hash function implementation
-    const hashString = (str) => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-      }
-      return Math.abs(hash).toString(36); // Convert to base36 for shorter representation
-    };
-
     const getUserIP = async () => {
       try {
         const response = await fetch('https://api.ipify.org/?format=json');
@@ -133,52 +122,6 @@ export const BrowserDataExtension = {
       };
     };
 
-    const calculateFingerprint = (data) => {
-      try {
-        // Hardware-specific identifiers (pouze skutečně stabilní hardware údaje)
-        const hardwareId = [
-          data.os,
-          data.osVersion,
-          data.deviceVendor,
-          data.processors,
-          data.memory || 'unknown',
-          `${data.screen.width}x${data.screen.height}`,
-          data.screen.colorDepth,
-          data.platform
-        ].join('::');
-
-        // Browser core identifiers (pouze nejstabilnější části)
-        const browserId = [
-          data.browser,
-          data.engine
-        ].join('::');
-
-        // System environment (minimální set systémových informací)
-        const envId = [
-          data.type,
-          data.os
-        ].join('::');
-
-        // Calculate weights for the final hash
-        const getWeightedComponent = (component, weight) => {
-          const hash = hashString(component);
-          return hash.repeat(weight);
-        };
-
-        // Ještě větší důraz na hardware
-        const components = [
-          getWeightedComponent(hardwareId, 10),    // Hardware gets even higher weight
-          getWeightedComponent(browserId, 1),      // Browser info gets minimal weight
-          getWeightedComponent(envId, 1)           // Environment gets minimal weight
-        ].join('||');
-        
-        return hashString(components);
-      } catch (error) {
-        console.error('Error calculating fingerprint:', error);
-        return 'X';
-      }
-    };
-
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const browserDetails = getBrowserDetails();
     const systemInfo = getSystemInfo();
@@ -220,12 +163,8 @@ export const BrowserDataExtension = {
       // Try to get IP address
       const ipAddress = await getUserIP();
       payload.ip_address = ipAddress;
-
-      // Try to calculate fingerprint
-      payload.fingerprint = calculateFingerprint(payload);
     } catch (error) {
       console.error('Error in data processing:', error);
-      payload.fingerprint = 'X';
     }
 
     window.voiceflow.chat.interact({
