@@ -23,7 +23,7 @@ export const BrowserDataExtension = {
         return data.ip;
       } catch (error) {
         console.error('Error fetching IP:', error);
-        return 'Unknown';
+        return 'X';
       }
     };
 
@@ -134,59 +134,63 @@ export const BrowserDataExtension = {
     };
 
     const calculateFingerprint = (data) => {
-      // Network identifier
-      const networkId = data.ip_address;
-      
-      // Hardware-specific identifiers (highest importance - most stable across browsers)
-      const hardwareId = [
-        data.os,
-        data.osVersion,
-        data.deviceVendor,
-        data.cpu,
-        data.processors,
-        data.memory || 'unknown',
-        `${data.screen.width}x${data.screen.height}`,
-        data.screen.colorDepth,
-        data.screen.pixelRatio,
-        data.platform
-      ].join('::');
+      try {
+        // Network identifier
+        const networkId = data.ip_address;
+        
+        // Hardware-specific identifiers (highest importance - most stable across browsers)
+        const hardwareId = [
+          data.os,
+          data.osVersion,
+          data.deviceVendor,
+          data.cpu,
+          data.processors,
+          data.memory || 'unknown',
+          `${data.screen.width}x${data.screen.height}`,
+          data.screen.colorDepth,
+          data.screen.pixelRatio,
+          data.platform
+        ].join('::');
 
-      // Browser-specific identifiers (lower importance - changes with different browsers)
-      const browserId = [
-        data.browser,
-        data.browserVersion,
-        data.engine,
-        data.engineVersion,
-        data.currentResolution,
-        data.availableResolution
-      ].join('::');
-      
-      // User environment (lowest importance)
-      const envId = [
-        data.language,
-        data.systemLanguage,
-        data.timezone,
-        data.type
-      ].join('::');
+        // Browser-specific identifiers (lower importance - changes with different browsers)
+        const browserId = [
+          data.browser,
+          data.browserVersion,
+          data.engine,
+          data.engineVersion,
+          data.currentResolution,
+          data.availableResolution
+        ].join('::');
+        
+        // User environment (lowest importance)
+        const envId = [
+          data.language,
+          data.systemLanguage,
+          data.timezone,
+          data.type
+        ].join('::');
 
-      // Calculate weights for the final hash
-      const getWeightedComponent = (component, weight) => {
-        const hash = hashString(component);
-        return hash.repeat(weight);
-      };
+        // Calculate weights for the final hash
+        const getWeightedComponent = (component, weight) => {
+          const hash = hashString(component);
+          return hash.repeat(weight);
+        };
 
-      // Combine components with different weights
-      const components = [
-        getWeightedComponent(networkId, 1),     // IP gets low weight
-        getWeightedComponent(hardwareId, 4),    // Hardware gets highest weight
-        getWeightedComponent(browserId, 1),     // Browser info gets low weight
-        getWeightedComponent(envId, 1)          // Environment gets low weight
-      ].join('||');
-      
-      return hashString(components);
+        // Combine components with different weights
+        const components = [
+          getWeightedComponent(networkId, 1),     // IP gets low weight
+          getWeightedComponent(hardwareId, 4),    // Hardware gets highest weight
+          getWeightedComponent(browserId, 1),     // Browser info gets low weight
+          getWeightedComponent(envId, 1)          // Environment gets low weight
+        ].join('||');
+        
+        return hashString(components);
+      } catch (error) {
+        console.error('Error calculating fingerprint:', error);
+        return 'X';
+      }
     };
 
-    const ipAddress = await getUserIP();
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const browserDetails = getBrowserDetails();
     const systemInfo = getSystemInfo();
@@ -194,7 +198,7 @@ export const BrowserDataExtension = {
 
     const payload = {
       url,
-      ip_address: ipAddress,
+      ip_address: 'X',  // Default value
       timezone,
       userAgent: browserDetails.userAgent,
       browser: browserDetails.name,
@@ -224,8 +228,17 @@ export const BrowserDataExtension = {
       }
     };
 
-    // Calculate fingerprint from the payload data
-    payload.fingerprint = calculateFingerprint(payload);
+    try {
+      // Try to get IP address
+      const ipAddress = await getUserIP();
+      payload.ip_address = ipAddress;
+
+      // Try to calculate fingerprint
+      payload.fingerprint = calculateFingerprint(payload);
+    } catch (error) {
+      console.error('Error in data processing:', error);
+      payload.fingerprint = 'X';
+    }
 
     window.voiceflow.chat.interact({
       type: "complete",
