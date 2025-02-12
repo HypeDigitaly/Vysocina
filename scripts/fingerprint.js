@@ -226,8 +226,31 @@ class ComprehensiveBrowserFingerprint {
 
 export const generateFingerprint = () => {
     const fingerprinter = new ComprehensiveBrowserFingerprint();
+    const components = fingerprinter.getAllComponents();
+    const fingerprint = fingerprinter.calculateFingerprint();
+
+    // Log all components
+    console.log("Generated fingerprint:", fingerprint);
+    console.log("Detailed Browser Components:");
+    console.log("- User Agent:", components.userAgent);
+    console.log("- Browser:", components.browser);
+    console.log("- Browser Version:", components.browserVersion);
+    console.log("- Engine:", components.engine);
+    console.log("- Engine Version:", components.engineVersion);
+    console.log("- Operating System:", components.os);
+    console.log("- OS Version:", components.osVersion);
+    console.log("- Device:", components.device);
+    console.log("- Device Type:", components.deviceType);
+    console.log("- Device Vendor:", components.deviceVendor);
+    console.log("- CPU:", components.cpu);
+    console.log("- Current Resolution:", components.currentResolution);
+    console.log("- Available Resolution:", components.availableResolution);
+    console.log("- Time Zone:", components.timeZone);
+    console.log("- Language:", components.language);
+    console.log("- System Language:", components.systemLanguage);
+
     return {
-        fingerprint: fingerprinter.calculateFingerprint(),
-        components: fingerprinter.getAllComponents()
+        fingerprint,
+        components
     };
 };
