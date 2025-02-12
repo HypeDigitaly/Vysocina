@@ -1,100 +1,43 @@
 // fingerprint.js
-class ComprehensiveBrowserFingerprint {
+class StableDeviceFingerprint {
     constructor() {
         this.components = [];
-        this.userAgent = navigator.userAgent;
-        this.platform = navigator.platform;
     }
 
-    getUserAgent() {
-        return this.userAgent;
-    }
-
-    getBrowser() {
-        const ua = this.userAgent;
-        if (ua.includes("Chrome")) return "Chrome";
-        if (ua.includes("Firefox")) return "Firefox";
-        if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
-        if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
-        if (ua.includes("Edge")) return "Edge";
-        if (ua.includes("MSIE") || ua.includes("Trident/")) return "Internet Explorer";
+    // Hardware-specific methods
+    getCPU() {
+        const ua = navigator.userAgent;
+        if (ua.includes("x64") || ua.includes("x86_64")) return "x64";
+        if (ua.includes("x86") || ua.includes("i686")) return "x86";
+        if (ua.includes("arm")) return "ARM";
         return "Unknown";
     }
 
-    getBrowserVersion() {
-        const ua = this.userAgent;
-        const browser = this.getBrowser();
-        let match;
-
-        switch (browser) {
-            case "Chrome":
-                match = ua.match(/Chrome\/(\d+\.\d+\.\d+\.\d+)/);
-                break;
-            case "Firefox":
-                match = ua.match(/Firefox\/(\d+\.\d+)/);
-                break;
-            case "Safari":
-                match = ua.match(/Version\/(\d+\.\d+\.\d+)/);
-                break;
-            case "Opera":
-                match = ua.match(/OPR\/(\d+\.\d+\.\d+)/);
-                break;
-            case "Edge":
-                match = ua.match(/Edge\/(\d+\.\d+\.\d+)/);
-                break;
-            case "Internet Explorer":
-                match = ua.match(/MSIE (\d+\.\d+)/);
-                break;
-        }
-
-        return match ? match[1] : "Unknown";
+    getCurrentResolution() {
+        return `${window.screen.width}x${window.screen.height}`;
     }
 
-    getEngine() {
-        const ua = this.userAgent;
-        if (ua.includes("Gecko/")) return "Gecko";
-        if (ua.includes("AppleWebKit")) return "WebKit";
-        if (ua.includes("Trident/")) return "Trident";
-        if (ua.includes("Presto/")) return "Presto";
-        return "Unknown";
+    getAvailableResolution() {
+        return `${window.screen.availWidth}x${window.screen.availHeight}`;
     }
 
-    getEngineVersion() {
-        const ua = this.userAgent;
-        const engine = this.getEngine();
-        let match;
-
-        switch (engine) {
-            case "WebKit":
-                match = ua.match(/AppleWebKit\/(\d+\.\d+)/);
-                break;
-            case "Gecko":
-                match = ua.match(/rv:(\d+\.\d+)/);
-                break;
-            case "Trident":
-                match = ua.match(/Trident\/(\d+\.\d+)/);
-                break;
-            case "Presto":
-                match = ua.match(/Presto\/(\d+\.\d+)/);
-                break;
-        }
-
-        return match ? match[1] : "Unknown";
+    getColorDepth() {
+        return window.screen.colorDepth;
     }
 
+    // OS-specific methods
     getOS() {
-        const ua = this.userAgent;
+        const ua = navigator.userAgent;
         if (ua.includes("Windows")) return "Windows";
         if (ua.includes("Mac OS X")) return "Mac OS X";
         if (ua.includes("Linux")) return "Linux";
         if (ua.includes("Android")) return "Android";
         if (ua.includes("iOS")) return "iOS";
-        if (ua.includes("Ubuntu")) return "Ubuntu";
         return "Unknown";
     }
 
     getOSVersion() {
-        const ua = this.userAgent;
+        const ua = navigator.userAgent;
         const os = this.getOS();
         let match;
 
@@ -116,80 +59,90 @@ class ComprehensiveBrowserFingerprint {
         return match ? match[1].replace(/_/g, '.') : "Unknown";
     }
 
+    // Device-specific methods
     getDevice() {
-        const ua = this.userAgent;
-        if (ua.includes("iPhone")) return "iPhone";
-        if (ua.includes("iPad")) return "iPad";
-        if (ua.includes("Android")) return "Android Device";
+        if (this.isMobile()) {
+            const ua = navigator.userAgent;
+            if (ua.includes("iPhone")) return "iPhone";
+            if (ua.includes("iPad")) return "iPad";
+            if (ua.includes("Android")) return "Android Device";
+            return "Mobile Device";
+        }
         return "Desktop";
     }
 
     getDeviceType() {
-        const ua = this.userAgent;
+        const ua = navigator.userAgent;
         if (ua.includes("Mobile")) return "Mobile";
         if (ua.includes("Tablet")) return "Tablet";
         return "Desktop";
     }
 
-    getDeviceVendor() {
-        const ua = this.userAgent;
-        if (ua.includes("iPhone") || ua.includes("iPad")) return "Apple";
-        if (ua.includes("Samsung")) return "Samsung";
-        if (ua.includes("Huawei")) return "Huawei";
-        if (ua.includes("Pixel")) return "Google";
-        return "Unknown";
+    isMobile() {
+        return /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
 
-    getCPU() {
-        const ua = this.userAgent;
-        if (ua.includes("x64") || ua.includes("x86_64")) return "x64";
-        if (ua.includes("x86") || ua.includes("i686")) return "x86";
-        if (ua.includes("arm")) return "ARM";
-        return "Unknown";
+    // Canvas fingerprinting (hardware-dependent)
+    getCanvasFingerprint() {
+        const canvas = document.createElement('canvas');
+        if (!canvas.getContext) return null;
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = 220;
+        canvas.height = 30;
+
+        // Text with special characters
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        
+        // Mixing fill styles
+        ctx.fillStyle = "#069";
+        ctx.font = "15px 'Arial'";
+        ctx.fillText("ClientJS<canvas>", 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.font = "16px 'Arial'";
+        ctx.fillText("ClientJS<canvas>", 4, 17);
+
+        // Draw a complex shape
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+        ctx.fill();
+
+        return canvas.toDataURL();
     }
 
-    getCurrentResolution() {
-        return `${window.screen.width}x${window.screen.height}`;
+    // Hardware features
+    getHardwareFeatures() {
+        return {
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+            deviceMemory: navigator.deviceMemory || 'unknown',
+            maxTouchPoints: navigator.maxTouchPoints || 'unknown'
+        };
     }
 
-    getAvailableResolution() {
-        return `${window.screen.availWidth}x${window.screen.availHeight}`;
-    }
-
-    getTimeZone() {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-
-    getLanguage() {
-        return navigator.language || navigator.userLanguage || "Unknown";
-    }
-
-    getSystemLanguage() {
-        return navigator.language || "Unknown";
-    }
-
+    // Calculate stable device fingerprint
     calculateFingerprint() {
+        // Collect stable components
         this.components = [
-            this.getUserAgent(),
-            this.getBrowser(),
-            this.getBrowserVersion(),
-            this.getEngine(),
-            this.getEngineVersion(),
+            this.getCPU(),
+            this.getCurrentResolution(),
+            this.getAvailableResolution(),
+            this.getColorDepth().toString(),
             this.getOS(),
             this.getOSVersion(),
             this.getDevice(),
             this.getDeviceType(),
-            this.getDeviceVendor(),
-            this.getCPU(),
-            this.getCurrentResolution(),
-            this.getAvailableResolution(),
-            this.getTimeZone(),
-            this.getLanguage(),
-            this.getSystemLanguage()
+            this.getCanvasFingerprint(),
+            JSON.stringify(this.getHardwareFeatures())
         ];
 
-        const componentsStr = this.components.join('###');
-        return this.generateHash(componentsStr);
+        // Generate hash
+        return this.generateHash(this.components.join('###'));
     }
 
     generateHash(str) {
@@ -203,52 +156,42 @@ class ComprehensiveBrowserFingerprint {
     }
 
     getAllComponents() {
-        return {
-            userAgent: this.getUserAgent(),
-            browser: this.getBrowser(),
-            browserVersion: this.getBrowserVersion(),
-            engine: this.getEngine(),
-            engineVersion: this.getEngineVersion(),
+        const components = {
+            cpu: this.getCPU(),
+            currentResolution: this.getCurrentResolution(),
+            availableResolution: this.getAvailableResolution(),
+            colorDepth: this.getColorDepth(),
             os: this.getOS(),
             osVersion: this.getOSVersion(),
             device: this.getDevice(),
             deviceType: this.getDeviceType(),
-            deviceVendor: this.getDeviceVendor(),
-            cpu: this.getCPU(),
-            currentResolution: this.getCurrentResolution(),
-            availableResolution: this.getAvailableResolution(),
-            timeZone: this.getTimeZone(),
-            language: this.getLanguage(),
-            systemLanguage: this.getSystemLanguage()
+            hardwareFeatures: this.getHardwareFeatures(),
+            isMobile: this.isMobile()
         };
+
+        // Log all components for debugging
+        console.log("Device Fingerprint Components:");
+        console.log("- CPU Architecture:", components.cpu);
+        console.log("- Screen Resolution:", components.currentResolution);
+        console.log("- Available Resolution:", components.availableResolution);
+        console.log("- Color Depth:", components.colorDepth);
+        console.log("- Operating System:", components.os);
+        console.log("- OS Version:", components.osVersion);
+        console.log("- Device Type:", components.deviceType);
+        console.log("- Hardware Features:", components.hardwareFeatures);
+        console.log("- Is Mobile:", components.isMobile);
+
+        return components;
     }
 }
 
 export const generateFingerprint = () => {
-    const fingerprinter = new ComprehensiveBrowserFingerprint();
-    const components = fingerprinter.getAllComponents();
+    const fingerprinter = new StableDeviceFingerprint();
     const fingerprint = fingerprinter.calculateFingerprint();
+    const components = fingerprinter.getAllComponents();
 
-    // Log all components
-    console.log("Generated fingerprint:", fingerprint);
-    console.log("Detailed Browser Components:");
-    console.log("- User Agent:", components.userAgent);
-    console.log("- Browser:", components.browser);
-    console.log("- Browser Version:", components.browserVersion);
-    console.log("- Engine:", components.engine);
-    console.log("- Engine Version:", components.engineVersion);
-    console.log("- Operating System:", components.os);
-    console.log("- OS Version:", components.osVersion);
-    console.log("- Device:", components.device);
-    console.log("- Device Type:", components.deviceType);
-    console.log("- Device Vendor:", components.deviceVendor);
-    console.log("- CPU:", components.cpu);
-    console.log("- Current Resolution:", components.currentResolution);
-    console.log("- Available Resolution:", components.availableResolution);
-    console.log("- Time Zone:", components.timeZone);
-    console.log("- Language:", components.language);
-    console.log("- System Language:", components.systemLanguage);
-
+    console.log("Generated Device Fingerprint:", fingerprint);
+    
     return {
         fingerprint,
         components
