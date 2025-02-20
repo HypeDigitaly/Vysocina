@@ -291,7 +291,7 @@ export const StreamingResponseExtension = {
         answerSection.style.display = 'block'
 
         try {
-          const response = await fetch('https://vysocina-hypedigitaly.replit.app/api/claude/chat', {
+          const response = await fetch('/api/claude/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
