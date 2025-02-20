@@ -278,61 +278,55 @@ export const StreamingResponseExtension = {
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
-        console.log('🔵 Starting streamResponse with payload:', {
+        // Log initial Voiceflow payload
+        console.log('🎬 Voiceflow Payload:', {
           model: trace.payload?.model,
           max_tokens: trace.payload?.max_tokens,
           temperature: trace.payload?.temperature,
-          systemPrompt: trace.payload?.systemPrompt?.substring(0, 100) + '...',
-          userDataLength: trace.payload?.userData?.length
+          systemPrompt: trace.payload?.systemPrompt,
+          userData: trace.payload?.userData
         });
 
+        // Prepare request payload
         const requestPayload = {
           model: trace.payload?.model || 'claude-3-sonnet-20241022',
           max_tokens: trace.payload?.max_tokens || 4096,
           temperature: trace.payload?.temperature || 0,
-          system: [{
-            type: "text",
-            text: trace.payload?.systemPrompt || "You are a helpful AI assistant.",
-            cache_control: {
-              type: "ephemeral"
-            }
-          }],
-          messages: [{
-            role: "user",
-            content: trace.payload?.userData || ""
-          }]
+          systemPrompt: trace.payload?.systemPrompt || "You are a helpful AI assistant.",
+          userData: trace.payload?.userData || ""
         };
 
-        console.log('🟡 Sending request to API with payload:', JSON.stringify(requestPayload, null, 2));
+        console.log('📤 Sending to server:', requestPayload);
+
+        // Update UI to show connection attempt
+        answerContent.innerHTML = `
+          <div style="padding: 8px; background: #f0f9ff; border-radius: 4px; margin-bottom: 8px;">
+            🔄 Connecting to Claude API...
+          </div>
+        `;
 
         const response = await fetch('http://localhost:3000/api/claude/chat', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01',
+            'anthropic-beta': 'prompt-caching-2024-07-31'
           },
           body: JSON.stringify(requestPayload)
         });
 
-        console.log('🟢 API Response received:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
+        console.log('📥 Server Response Status:', response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ API Error:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
-          });
-          throw new Error(`API request failed (${response.status}): ${errorText}`);
+          console.error('❌ Server Error:', errorText);
+          throw new Error(`Server request failed (${response.status}): ${errorText}`);
         }
 
-        // Update status for successful connection
-        streamingContent.innerHTML += `
-          <div style="padding: 8px;">
-            <strong>Status:</strong> Connected, receiving stream...
+        // Update UI to show successful connection
+        answerContent.innerHTML = `
+          <div style="padding: 8px; background: #f0fdf4; border-radius: 4px; margin-bottom: 8px;">
+            ✅ Connected! Receiving stream...
           </div>
         `;
 
@@ -343,11 +337,18 @@ export const StreamingResponseExtension = {
         let chunkCounter = 0;
         let totalCharacters = 0;
 
-        console.log('🟣 Beginning to read stream...');
+        console.log('📡 Starting stream processing...');
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          
+          if (done) {
+            console.log('✨ Stream completed:', {
+              totalChunks: chunkCounter,
+              totalCharacters: totalCharacters
+            });
+            break;
+          }
 
           const chunk = decoder.decode(value);
           let jsonBuffer = buffer + chunk;
@@ -364,39 +365,45 @@ export const StreamingResponseExtension = {
             const data = JSON.parse(eventLines[1].replace('data: ', ''));
 
             chunkCounter++;
+            
             if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
               currentMarkdown += data.delta.text;
               totalCharacters += data.delta.text.length;
 
-              if (chunkCounter % 10 === 0) {  // Log every 10th chunk
-                console.log(`🟨 Processing chunk #${chunkCounter}, total characters: ${totalCharacters}`);
+              // Log progress every 20 chunks
+              if (chunkCounter % 20 === 0) {
+                console.log('📊 Stream Progress:', {
+                  chunk: chunkCounter,
+                  characters: totalCharacters,
+                  lastDelta: data.delta.text.slice(0, 20) + '...'
+                });
               }
 
-              const answerContent = answerSection.querySelector('#answer-content');
-              if (answerContent) {
-                answerContent.innerHTML = markdownToHtml(currentMarkdown);
-              }
+              // Update UI with new content
+              answerContent.innerHTML = `
+                <div class="stream-progress" style="padding: 4px 8px; background: #f0fdf4; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
+                  📝 Received ${totalCharacters} characters in ${chunkCounter} chunks
+                </div>
+                ${markdownToHtml(currentMarkdown)}
+              `;
             }
           }
         }
 
-        console.log(`✅ Stream completed. Total chunks: ${chunkCounter}, Total characters: ${totalCharacters}`);
-
       } catch (error) {
-        console.error('❌ Streaming error:', {
+        console.error('🚨 Stream Error:', {
           message: error.message,
-          stack: error.stack,
-          details: error
+          stack: error.stack
         });
-        
-        const answerContent = answerSection.querySelector('#answer-content');
-        if (answerContent) {
-          answerContent.innerHTML = `
-            <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
-              <strong>Error:</strong> ${error.message}
-            </div>
-          `;
-        }
+
+        // Update UI with error state
+        answerContent.innerHTML = `
+          <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+            <strong>❌ Error:</strong> ${error.message}
+            <br>
+            <small>Check console for details</small>
+          </div>
+        `;
       }
     }
 
