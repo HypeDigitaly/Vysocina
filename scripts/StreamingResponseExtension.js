@@ -272,33 +272,44 @@ export const StreamingResponseExtension = {
     // Update the streaming function to show debug info first
     async function streamResponse(messages) {
       try {
+        // Validate API key first
+        if (!trace.payload?.apiKey || trace.payload.apiKey === '{claude_api_key_secret}') {
+          throw new Error('Invalid or missing API key');
+        }
+
         const requestPayload = {
           ...trace.payload,
           stream: true
         }
         
-        // Display debug information
+        // Display initial status
         answerContent.innerHTML = `
-          <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-family: monospace; white-space: pre-wrap; font-size: 12px;">
-            <strong>Debug Info - Request Payload:</strong>
-            ${JSON.stringify(requestPayload, null, 2)}
+          <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+            <strong>Status:</strong> Connecting to Claude API...
+            <div style="margin-top: 8px; font-family: monospace; font-size: 12px;">
+              <strong>Request Details:</strong>
+              <br>- Model: ${requestPayload.model || 'Not specified'}
+              <br>- Max Tokens: ${requestPayload.max_tokens || 'Not specified'}
+            </div>
           </div>
           <div id="streaming-response"></div>
         `
-        
-        // Get reference to where the actual response will stream
-        const streamingResponse = document.getElementById('streaming-response')
-        
+
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'x-api-key': trace.payload?.apiKey,
+            'x-api-key': trace.payload.apiKey,
             'anthropic-version': '2023-06-01',
             'content-type': 'application/json',
             'anthropic-beta': 'prompt-caching-2024-07-31'
           },
           body: JSON.stringify(requestPayload)
         })
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`API request failed: ${response.status} - ${errorData}`);
+        }
 
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
@@ -325,21 +336,22 @@ export const StreamingResponseExtension = {
 
             if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
               currentMarkdown += data.delta.text
-              streamingResponse.innerHTML = markdownToHtml(currentMarkdown)
+              streamingContent.innerHTML = markdownToHtml(currentMarkdown)
             }
           }
         }
 
       } catch (error) {
         answerContent.innerHTML = `
-          <div style="background: #ffe6e6; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-family: monospace; white-space: pre-wrap; font-size: 12px;">
-            <strong>Error:</strong> Failed to get response from Claude API
+          <div style="background: #ffe6e6; padding: 12px; border-radius: 6px;">
+            <strong>Error:</strong> ${error.message}
             <br><br>
-            <strong>Debug Info - Request Payload:</strong>
-            ${JSON.stringify(requestPayload, null, 2)}
-            <br><br>
-            <strong>Error Details:</strong>
-            ${error.message}
+            <strong>Troubleshooting:</strong>
+            <ul style="margin-top: 8px;">
+              <li>Check if the API key is properly configured</li>
+              <li>Verify the model name is correct</li>
+              <li>Ensure the request payload is properly formatted</li>
+            </ul>
           </div>
         `
       }
