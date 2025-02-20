@@ -1,19 +1,19 @@
 export const StreamingResponseExtension = {
-  name: 'StreamingResponse',
-  type: 'response',
+  name: "StreamingResponse",
+  type: "response",
   match: ({ trace }) =>
-    trace.type === 'ext_streamingResponse' ||
-    trace.payload?.name === 'ext_streamingResponse',
+    trace.type === "ext_streamingResponse" ||
+    trace.payload?.name === "ext_streamingResponse",
   render: async ({ trace, element }) => {
-    const container = document.createElement('div')
-    container.className = 'streaming-container'
+    const container = document.createElement("div");
+    container.className = "streaming-container";
 
     // Function to format model name (simplified)
     function formatModelName(model) {
       return model
-        .split('-')
+        .split("-")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+        .join(" ");
     }
 
     // Create the base structure first
@@ -231,7 +231,7 @@ export const StreamingResponseExtension = {
           </div>
           <div class="streaming-title-wrapper">
             <div class="streaming-title">Streaming<span class="streaming-model">with ${formatModelName(
-              trace.payload?.model || 'Unknown Model'
+              trace.payload?.model || "Unknown Model",
             )}</span></div>
             <svg class="toggle-icon" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
@@ -251,63 +251,66 @@ export const StreamingResponseExtension = {
       <div class="answer-section">
         <div class="answer-content" id="answer-content"></div>
       </div>
-    `
+    `;
 
     // Add the container to the element first
-    element.appendChild(container)
+    element.appendChild(container);
 
     // Get references to elements
-    const streamingSection = container.querySelector('.streaming-section')
-    const streamingContent = container.querySelector('#streaming-content')
-    const answerContent = container.querySelector('#answer-content')
-    const answerSection = container.querySelector('.answer-section')
+    const streamingSection = container.querySelector(".streaming-section");
+    const streamingContent = container.querySelector("#streaming-content");
+    const answerContent = container.querySelector("#answer-content");
+    const answerSection = container.querySelector(".answer-section");
 
     // Initialize the sections properly
-    streamingSection.style.display = 'none'
-    answerSection.style.display = 'block'
-    answerContent.innerHTML = 'Connecting to Claude API...' // Add initial loading state
+    streamingSection.style.display = "none";
+    answerSection.style.display = "block";
+    answerContent.innerHTML = "Connecting to Claude API..."; // Add initial loading state
 
     // Add some basic styling to ensure visibility
-    answerSection.style.width = '100%'
-    answerSection.style.margin = '0'
-    answerSection.style.padding = '0'
-    answerContent.style.fontSize = '14px'
-    answerContent.style.lineHeight = '1.4'
-    answerContent.style.color = '#374151'
+    answerSection.style.width = "100%";
+    answerSection.style.margin = "0";
+    answerSection.style.padding = "0";
+    answerContent.style.fontSize = "14px";
+    answerContent.style.lineHeight = "1.4";
+    answerContent.style.color = "#374151";
 
     // Update the streamResponse function
     async function streamResponse() {
       try {
-        const messageContainer = element.closest('.vfrc-message')
+        const messageContainer = element.closest(".vfrc-message");
         if (!messageContainer) {
-          throw new Error('Could not find message container')
+          throw new Error("Could not find message container");
         }
 
-        const answerSection = messageContainer.querySelector('.answer-section')
+        const answerSection = messageContainer.querySelector(".answer-section");
         if (!answerSection) {
-          throw new Error('Answer section not found in DOM')
+          throw new Error("Answer section not found in DOM");
         }
 
-        answerSection.style.display = 'block'
+        answerSection.style.display = "block";
 
         try {
-          const response = await fetch('https://vysocina-hypedigitaly.replit.app/api/claude/chat', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            "https://vysocina-hypedigitaly.replit.app/api/claude/chat",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(trace.payload),
             },
-            body: JSON.stringify(trace.payload)
-          })
+          );
 
           // Add response status logging
-          console.log('Claude API response status:', {
+          console.log("Claude API response status:", {
             status: response.status,
             statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries())
+            headers: Object.fromEntries(response.headers.entries()),
           });
 
           let responseText = null;
-          
+
           try {
             responseText = await response.text();
           } catch (parseError) {
@@ -323,57 +326,61 @@ export const StreamingResponseExtension = {
             <div style="padding: 8px;">
               <strong>Status:</strong> Connected, receiving stream...
             </div>
-          `
+          `;
 
-          const reader = response.body.getReader()
-          const decoder = new TextDecoder()
-          let buffer = ''
-          let currentMarkdown = ''
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+          let currentMarkdown = "";
 
           while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
+            const { done, value } = await reader.read();
+            if (done) break;
 
-            const chunk = decoder.decode(value)
-            let jsonBuffer = buffer + chunk
-            buffer = ''
+            const chunk = decoder.decode(value);
+            let jsonBuffer = buffer + chunk;
+            buffer = "";
 
-            const events = jsonBuffer.split('\n\n')
-            buffer = events.pop() || ''
+            const events = jsonBuffer.split("\n\n");
+            buffer = events.pop() || "";
 
             for (const event of events) {
-              if (!event.trim()) continue
+              if (!event.trim()) continue;
 
-              const eventLines = event.split('\n')
-              const eventType = eventLines[0].replace('event: ', '')
-              const data = JSON.parse(eventLines[1].replace('data: ', ''))
+              const eventLines = event.split("\n");
+              const eventType = eventLines[0].replace("event: ", "");
+              const data = JSON.parse(eventLines[1].replace("data: ", ""));
 
-              if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
-                currentMarkdown += data.delta.text
-                const answerContent = answerSection.querySelector('#answer-content')
+              if (
+                eventType === "content_block_delta" &&
+                data.delta?.type === "text_delta"
+              ) {
+                currentMarkdown += data.delta.text;
+                const answerContent =
+                  answerSection.querySelector("#answer-content");
                 if (answerContent) {
-                  answerContent.innerHTML = markdownToHtml(currentMarkdown)
+                  answerContent.innerHTML = markdownToHtml(currentMarkdown);
                 }
               }
             }
           }
-
         } catch (fetchError) {
           const errorDetails = {
             error: fetchError.message,
             request: {
-              url: '/api/claude/chat',
-              method: 'POST',
-              payload: trace.payload
+              url: "https://vysocina-hypedigitaly.replit.app/",
+              method: "POST",
+              payload: trace.payload,
             },
             response: {
               status: fetchError.response?.status,
               statusText: fetchError.response?.statusText,
-              data: responseData || responseText || 'No response data available'
-            }
+              data:
+                responseData || responseText || "No response data available",
+            },
           };
 
-          const answerContent = container.querySelector('#answer-content')
+          const answerContent = container.querySelector("#answer-content");
           if (answerContent) {
             answerContent.innerHTML = `
               <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
@@ -398,15 +405,14 @@ ${JSON.stringify(errorDetails, null, 2)}
                   <li>Check browser console for additional error details</li>
                 </ul>
               </div>
-            `
+            `;
           }
-          
-          console.error('Detailed error information:', errorDetails);
+
+          console.error("Detailed error information:", errorDetails);
           throw fetchError;
         }
-
       } catch (error) {
-        console.error('Streaming Response Error:', error);
+        console.error("Streaming Response Error:", error);
         // The error is already handled in the fetch catch block
       }
     }
@@ -415,35 +421,37 @@ ${JSON.stringify(errorDetails, null, 2)}
     function markdownToHtml(markdown) {
       return markdown
         .trim()
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
-          `<pre><code class="language-${lang || ''}">${code.trim()}</code></pre>`
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        .replace(
+          /```(\w+)?\n([\s\S]*?)```/g,
+          (_, lang, code) =>
+            `<pre><code class="language-${lang || ""}">${code.trim()}</code></pre>`,
         )
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/^\d+\.\s+(.*)$/gm, '<li>$1</li>')
-        .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>')
-        .replace(/^(.+)$/, '<p>$1</p>')
+        .replace(/`(.*?)`/g, "<code>$1</code>")
+        .replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>")
+        .replace(/^-\s+(.*)$/gm, "<li>$1</li>")
+        .replace(/\n\n/g, "</p><p>")
+        .replace(/\n/g, "<br>")
+        .replace(/^(.+)$/, "<p>$1</p>");
     }
 
     if (trace.payload?.messages) {
-      console.log('Initiating stream with messages:', trace.payload.messages)
-      await streamResponse(trace.payload?.messages)
+      console.log("Initiating stream with messages:", trace.payload.messages);
+      await streamResponse(trace.payload?.messages);
     } else {
-      console.error('No messages found in payload:', trace.payload)
-      const answerContent = container.querySelector('#answer-content')
+      console.error("No messages found in payload:", trace.payload);
+      const answerContent = container.querySelector("#answer-content");
       if (answerContent) {
         answerContent.innerHTML = `
           <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
             <strong>Error:</strong> No messages found in payload
           </div>
-        `
+        `;
       }
     }
     window.voiceflow.chat.interact({
-      type: 'continue',
-    })
+      type: "continue",
+    });
   },
-}
+};
