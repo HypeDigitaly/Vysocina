@@ -6,6 +6,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 
 app.post('/api/claude/chat', async (req, res) => {
