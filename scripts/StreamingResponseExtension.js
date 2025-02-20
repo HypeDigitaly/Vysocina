@@ -375,8 +375,7 @@ export const StreamingResponseExtension = {
             response: {
               status: fetchError.response?.status,
               statusText: fetchError.response?.statusText,
-              data:
-                responseData || responseText || "No response data available",
+              data: responseText || "No response data available",
             },
           };
 

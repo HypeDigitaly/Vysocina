@@ -53,7 +53,14 @@ app.post('/api/claude/chat', async (req, res) => {
     res.end();
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Detailed error:', {
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: error.message,
+      details: error.response ? await error.response.text() : null
+    });
   }
 });
 
