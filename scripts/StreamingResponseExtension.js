@@ -362,10 +362,9 @@ export const StreamingResponseExtension = {
           const errorDetails = {
             error: fetchError.message,
             request: {
-              url: 'https://api.anthropic.com/v1/messages',
+              url: '/api/claude/chat',
               method: 'POST',
-              headers: displayPayload.headers,
-              payload: displayPayload
+              payload: trace.payload
             },
             response: {
               status: fetchError.response?.status,

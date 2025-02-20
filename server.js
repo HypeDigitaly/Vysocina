@@ -13,6 +13,11 @@ app.get('/', (req, res) => {
 const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 
 app.post('/api/claude/chat', async (req, res) => {
+  if (!CLAUDE_API_KEY) {
+    res.status(500).json({ error: 'Claude API key not configured' });
+    return;
+  }
+  
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
