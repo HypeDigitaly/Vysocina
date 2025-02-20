@@ -262,18 +262,28 @@ export const StreamingResponseExtension = {
     const answerContent = container.querySelector('#answer-content')
     const answerSection = container.querySelector('.answer-section')
 
-    // Hide the streaming section completely
+    // Initialize the sections properly
     streamingSection.style.display = 'none'
-    
-    // Show answer section immediately and style it to be at the parent level
-    answerSection.classList.add('visible')
     answerSection.style.display = 'block'
-    answerSection.style.padding = '0'
+    answerContent.innerHTML = 'Connecting to Claude API...' // Add initial loading state
+
+    // Add some basic styling to ensure visibility
+    answerSection.style.width = '100%'
     answerSection.style.margin = '0'
+    answerSection.style.padding = '0'
+    answerContent.style.fontSize = '14px'
+    answerContent.style.lineHeight = '1.4'
+    answerContent.style.color = '#374151'
 
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
+        // Add debug logging
+        console.log('Starting stream response with payload:', {
+          ...trace.payload,
+          apiKey: '[REDACTED]'
+        })
+
         const messageContainer = element.closest('.vfrc-message')
         if (!messageContainer) {
           throw new Error('Could not find message container')
@@ -286,8 +296,13 @@ export const StreamingResponseExtension = {
 
         answerSection.style.display = 'block'
 
-        // Validate API key
+        // Validate API key first
         if (!trace.payload?.apiKey || trace.payload.apiKey === '{claude_api_key_secret}') {
+          answerContent.innerHTML = `
+            <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+              <strong>Error:</strong> Invalid or missing API key
+            </div>
+          `
           throw new Error('Invalid or missing API key')
         }
 
@@ -444,7 +459,18 @@ ${JSON.stringify(errorDetails, null, 2)}
     }
 
     if (trace.payload?.messages) {
+      console.log('Initiating stream with messages:', trace.payload.messages)
       await streamResponse(trace.payload?.messages)
+    } else {
+      console.error('No messages found in payload:', trace.payload)
+      const answerContent = container.querySelector('#answer-content')
+      if (answerContent) {
+        answerContent.innerHTML = `
+          <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+            <strong>Error:</strong> No messages found in payload
+          </div>
+        `
+      }
     }
     window.voiceflow.chat.interact({
       type: 'continue',
