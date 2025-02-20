@@ -248,7 +248,7 @@ export const StreamingResponseExtension = {
         </div>
         <div class="streaming-content" id="streaming-content"></div>
       </div>
-      <div class="answer-section">
+      <div class="answer-section" style="display: block;">
         <div class="answer-content" id="answer-content"></div>
       </div>
     `
@@ -256,6 +256,28 @@ export const StreamingResponseExtension = {
     // Add the container to the element first
     element.appendChild(container)
 
+    // Initialize sections
+    const streamingSection = container.querySelector('.streaming-section')
+    const answerSection = container.querySelector('.answer-section')
+    
+    // Make sure answer section is visible
+    streamingSection.style.display = 'none'
+    answerSection.style.display = 'block'
+    answerSection.classList.add('visible')
+
+    if (trace.payload?.messages) {
+      await streamResponse(trace.payload.messages)
+    }
+    
+    window.voiceflow.chat.interact({
+      type: 'continue',
+    })
+  },
+}
+
+// Update the streamResponse function
+async function streamResponse(messages) {
+  try {
     // Get references to elements
     const streamingSection = container.querySelector('.streaming-section')
     const streamingContent = container.querySelector('#streaming-content')
@@ -263,211 +285,73 @@ export const StreamingResponseExtension = {
     const answerSection = container.querySelector('.answer-section')
 
     // Initialize the sections properly
-    streamingSection.style.display = 'none'
+    streamingSection.style.display = 'block'
     answerSection.style.display = 'block'
-    answerContent.innerHTML = 'Connecting to Claude API...' // Add initial loading state
+    answerSection.classList.add('visible')
+    
+    // Show initial loading state
+    answerContent.innerHTML = 'Connecting to Claude API...'
 
-    // Add some basic styling to ensure visibility
-    answerSection.style.width = '100%'
-    answerSection.style.margin = '0'
-    answerSection.style.padding = '0'
-    answerContent.style.fontSize = '14px'
-    answerContent.style.lineHeight = '1.4'
-    answerContent.style.color = '#374151'
-
-    // Update the streamResponse function
-    async function streamResponse(messages) {
-      try {
-        // Enhanced logging of the full trace payload
-        console.group('🔍 Detailed Payload Debug Info');
-        console.log('Full trace:', trace);
-        console.log('Trace payload:', trace.payload);
-        console.log('Messages:', messages);
-        console.table({
-          model: trace.payload?.model,
-          max_tokens: trace.payload?.max_tokens,
-          temperature: trace.payload?.temperature,
-          systemPrompt: trace.payload?.systemPrompt,
-          userData: trace.payload?.userData
-        });
-        console.groupEnd();
-
-        // Add visual debug info to UI
-        answerContent.innerHTML = `
-          <div style="font-family: monospace; padding: 12px; background: #1e1e1e; color: #fff; border-radius: 6px; margin-bottom: 12px;">
-            <h4 style="margin: 0 0 8px 0; color: #63B3ED;">📊 Debug Information</h4>
-            <pre style="margin: 0; white-space: pre-wrap;">
-Model: ${trace.payload?.model || 'undefined'}
-Max Tokens: ${trace.payload?.max_tokens || 'undefined'}
-Temperature: ${trace.payload?.temperature || 'undefined'}
-System Prompt: ${trace.payload?.systemPrompt || 'undefined'}
-User Data: ${trace.payload?.userData || 'undefined'}
-            </pre>
-          </div>
-        `;
-
-        // Log initial Voiceflow payload
-        console.log('🎬 Voiceflow Payload:', {
-          model: trace.payload?.model,
-          max_tokens: trace.payload?.max_tokens,
-          temperature: trace.payload?.temperature,
-          systemPrompt: trace.payload?.systemPrompt,
-          userData: trace.payload?.userData
-        });
-
-        // Prepare request payload
-        const requestPayload = {
-          model: trace.payload?.model || 'claude-3-sonnet-20241022',
-          max_tokens: trace.payload?.max_tokens || 4096,
-          temperature: trace.payload?.temperature || 0,
-          systemPrompt: trace.payload?.systemPrompt || "You are a helpful AI assistant.",
-          userData: trace.payload?.userData || ""
-        };
-
-        console.log('📤 Sending to server:', requestPayload);
-
-        // Update UI to show connection attempt
-        answerContent.innerHTML = `
-          <div style="padding: 8px; background: #f0f9ff; border-radius: 4px; margin-bottom: 8px;">
-            🔄 Connecting to Claude API...
-          </div>
-        `;
-
-        const response = await fetch('http://localhost:3000/api/claude/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'anthropic-version': '2023-06-01',
-            'anthropic-beta': 'prompt-caching-2024-07-31'
-          },
-          body: JSON.stringify(requestPayload)
-        });
-
-        console.log('📥 Server Response Status:', response.status);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ Server Error:', errorText);
-          throw new Error(`Server request failed (${response.status}): ${errorText}`);
-        }
-
-        // Update UI to show successful connection
-        answerContent.innerHTML = `
-          <div style="padding: 8px; background: #f0fdf4; border-radius: 4px; margin-bottom: 8px;">
-            ✅ Connected! Receiving stream...
-          </div>
-        `;
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let currentMarkdown = '';
-        let chunkCounter = 0;
-        let totalCharacters = 0;
-
-        console.log('📡 Starting stream processing...');
-
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) {
-            console.log('✨ Stream completed:', {
-              totalChunks: chunkCounter,
-              totalCharacters: totalCharacters
-            });
-            break;
-          }
-
-          const chunk = decoder.decode(value);
-          let jsonBuffer = buffer + chunk;
-          buffer = '';
-
-          const events = jsonBuffer.split('\n\n');
-          buffer = events.pop() || '';
-
-          for (const event of events) {
-            if (!event.trim()) continue;
-
-            const eventLines = event.split('\n');
-            const eventType = eventLines[0].replace('event: ', '');
-            const data = JSON.parse(eventLines[1].replace('data: ', ''));
-
-            chunkCounter++;
-            
-            if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
-              currentMarkdown += data.delta.text;
-              totalCharacters += data.delta.text.length;
-
-              // Log progress every 20 chunks
-              if (chunkCounter % 20 === 0) {
-                console.log('📊 Stream Progress:', {
-                  chunk: chunkCounter,
-                  characters: totalCharacters,
-                  lastDelta: data.delta.text.slice(0, 20) + '...'
-                });
-              }
-
-              // Update UI with new content
-              answerContent.innerHTML = `
-                <div class="stream-progress" style="padding: 4px 8px; background: #f0fdf4; border-radius: 4px; margin-bottom: 8px; font-size: 12px;">
-                  📝 Received ${totalCharacters} characters in ${chunkCounter} chunks
-                </div>
-                ${markdownToHtml(currentMarkdown)}
-              `;
-            }
-          }
-        }
-
-      } catch (error) {
-        console.error('🚨 Stream Error:', {
-          message: error.message,
-          stack: error.stack
-        });
-
-        // Update UI with error state
-        answerContent.innerHTML = `
-          <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
-            <strong>❌ Error:</strong> ${error.message}
-            <br>
-            <small>Check console for details</small>
-          </div>
-        `;
-      }
-    }
-
-    // Simplified markdown to HTML converter
-    function markdownToHtml(markdown) {
-      return markdown
-        .trim()
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
-          `<pre><code class="language-${lang || ''}">${code.trim()}</code></pre>`
-        )
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/^\d+\.\s+(.*)$/gm, '<li>$1</li>')
-        .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>')
-        .replace(/^(.+)$/, '<p>$1</p>')
-    }
-
-    if (trace.payload?.messages) {
-      console.log('Initiating stream with messages:', trace.payload.messages)
-      await streamResponse(trace.payload?.messages)
-    } else {
-      console.error('No messages found in payload:', trace.payload)
-      const answerContent = container.querySelector('#answer-content')
-      if (answerContent) {
-        answerContent.innerHTML = `
-          <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
-            <strong>Error:</strong> No messages found in payload
-          </div>
-        `
-      }
-    }
-    window.voiceflow.chat.interact({
-      type: 'continue',
+    const response = await fetch('http://localhost:3000/api/claude/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: messages,
+        model: trace.payload?.model || 'claude-3-sonnet-20240229',
+      }),
     })
-  },
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let currentResponse = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      
+      if (done) break
+      
+      const chunk = decoder.decode(value)
+      buffer += chunk
+
+      // Update the UI with the new content
+      currentResponse += chunk
+      answerContent.innerHTML = markdownToHtml(currentResponse)
+      
+      // Make sure the content is visible
+      answerSection.style.display = 'block'
+      answerSection.classList.add('visible')
+    }
+
+  } catch (error) {
+    console.error('Stream Error:', error)
+    answerContent.innerHTML = `
+      <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+        <strong>Error:</strong> ${error.message}
+      </div>
+    `
+  }
+}
+
+// Simplified markdown to HTML converter
+function markdownToHtml(markdown) {
+  return markdown
+    .trim()
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
+      `<pre><code class="language-${lang || ''}">${code.trim()}</code></pre>`
+    )
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/^\d+\.\s+(.*)$/gm, '<li>$1</li>')
+    .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^(.+)$/, '<p>$1</p>')
 }
