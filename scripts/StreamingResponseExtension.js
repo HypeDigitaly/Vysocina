@@ -279,7 +279,6 @@ export const StreamingResponseExtension = {
           throw new Error('Could not find message container')
         }
 
-        // Only show the answer section, keep streaming section hidden
         const answerSection = messageContainer.querySelector('.answer-section')
         if (!answerSection) {
           throw new Error('Answer section not found in DOM')
@@ -297,109 +296,133 @@ export const StreamingResponseExtension = {
           stream: true
         }
 
-        const debugPayload = {
+        // Create a sanitized version of the payload for display
+        const displayPayload = {
           ...requestPayload,
           apiKey: requestPayload.apiKey ? '****' + requestPayload.apiKey.slice(-4) : 'missing',
           messages: requestPayload.messages?.map(msg => ({
             role: msg.role,
-            content: msg.content.slice(0, 100) + '...'
+            content: msg.content.slice(0, 100) + (msg.content.length > 100 ? '...' : '')
           }))
         }
 
-        // Show initial debug info
-        streamingContent.innerHTML = `
-          <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
-            <strong>Status:</strong> Initializing Claude API connection...
-            <div style="margin-top: 8px; font-family: monospace; font-size: 12px;">
-              <strong>Request Details:</strong>
-              <br>- Model: ${requestPayload.model || 'Not specified'}
-              <br>- Max Tokens: ${requestPayload.max_tokens || 'Not specified'}
-              <br>
-              <details open>
-                <summary>Debug Payload</summary>
-                <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
-${JSON.stringify(debugPayload, null, 2)}
-                </pre>
-              </details>
+        try {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': trace.payload.apiKey,
+              'anthropic-version': '2023-06-01',
+              'content-type': 'application/json',
+              'anthropic-beta': 'prompt-caching-2024-07-31'
+            },
+            body: JSON.stringify(requestPayload)
+          })
+
+          let responseData = null;
+          let responseText = null;
+          
+          try {
+            responseText = await response.text();
+            responseData = JSON.parse(responseText);
+          } catch (parseError) {
+            // If JSON parsing fails, we'll show the raw text
+          }
+
+          if (!response.ok) {
+            throw new Error(`API request failed (${response.status})`);
+          }
+
+          // Update status for successful connection
+          streamingContent.innerHTML += `
+            <div style="padding: 8px;">
+              <strong>Status:</strong> Connected, receiving stream...
             </div>
-          </div>
-        `
+          `
 
-        // Update status before API call
-        streamingContent.innerHTML += `
-          <div style="padding: 8px;">
-            <strong>Status:</strong> Making API request...
-          </div>
-        `
+          const reader = response.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+          let currentMarkdown = ''
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': trace.payload.apiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-            'anthropic-beta': 'prompt-caching-2024-07-31'
-          },
-          body: JSON.stringify(requestPayload)
-        })
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
 
-        if (!response.ok) {
-          const errorData = await response.text()
-          throw new Error(`API request failed: ${response.status} - ${errorData}`)
-        }
+            const chunk = decoder.decode(value)
+            let jsonBuffer = buffer + chunk
+            buffer = ''
 
-        // Update status for successful connection
-        streamingContent.innerHTML += `
-          <div style="padding: 8px;">
-            <strong>Status:</strong> Connected, receiving stream...
-          </div>
-        `
+            const events = jsonBuffer.split('\n\n')
+            buffer = events.pop() || ''
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        let currentMarkdown = ''
+            for (const event of events) {
+              if (!event.trim()) continue
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
+              const eventLines = event.split('\n')
+              const eventType = eventLines[0].replace('event: ', '')
+              const data = JSON.parse(eventLines[1].replace('data: ', ''))
 
-          const chunk = decoder.decode(value)
-          let jsonBuffer = buffer + chunk
-          buffer = ''
-
-          const events = jsonBuffer.split('\n\n')
-          buffer = events.pop() || ''
-
-          for (const event of events) {
-            if (!event.trim()) continue
-
-            const eventLines = event.split('\n')
-            const eventType = eventLines[0].replace('event: ', '')
-            const data = JSON.parse(eventLines[1].replace('data: ', ''))
-
-            if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
-              currentMarkdown += data.delta.text
-              const answerContent = answerSection.querySelector('#answer-content')
-              if (answerContent) {
-                answerContent.innerHTML = markdownToHtml(currentMarkdown)
+              if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
+                currentMarkdown += data.delta.text
+                const answerContent = answerSection.querySelector('#answer-content')
+                if (answerContent) {
+                  answerContent.innerHTML = markdownToHtml(currentMarkdown)
+                }
               }
             }
           }
+
+        } catch (fetchError) {
+          const errorDetails = {
+            error: fetchError.message,
+            request: {
+              url: 'https://api.anthropic.com/v1/messages',
+              method: 'POST',
+              headers: displayPayload.headers,
+              payload: displayPayload
+            },
+            response: {
+              status: fetchError.response?.status,
+              statusText: fetchError.response?.statusText,
+              data: responseData || responseText || 'No response data available'
+            }
+          };
+
+          const answerContent = container.querySelector('#answer-content')
+          if (answerContent) {
+            answerContent.innerHTML = `
+              <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+                <strong>Error:</strong> ${fetchError.message}
+                <br><br>
+                <details style="margin-top: 8px;">
+                  <summary style="cursor: pointer; padding: 8px 0;">
+                    <strong>Show Request/Response Details</strong>
+                  </summary>
+                  <div style="margin-top: 12px;">
+                    <pre style="background: #1f2937; color: #f3f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; white-space: pre-wrap;">
+${JSON.stringify(errorDetails, null, 2)}
+                    </pre>
+                  </div>
+                </details>
+                <br>
+                <strong>Troubleshooting steps:</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0;">
+                  <li>Verify your internet connection is stable</li>
+                  <li>Check if the Claude API is operational</li>
+                  <li>Ensure your API key is valid and properly configured</li>
+                  <li>Check browser console for additional error details</li>
+                </ul>
+              </div>
+            `
+          }
+          
+          console.error('Detailed error information:', errorDetails);
+          throw fetchError;
         }
 
       } catch (error) {
-        console.error('Streaming Response Error:', error)
-        
-        // Show error directly in the answer section
-        const answerContent = container.querySelector('#answer-content')
-        if (answerContent) {
-          answerContent.innerHTML = `
-            <div style="color: #ef4444;">
-              <strong>Error:</strong> ${error.message}
-            </div>
-          `
-        }
+        console.error('Streaming Response Error:', error);
+        // The error is already handled in the fetch catch block
       }
     }
 
