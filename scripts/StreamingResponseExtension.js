@@ -5,6 +5,8 @@ export const StreamingResponseExtension = {
     trace.type === 'ext_streamingResponse' ||
     trace.payload?.name === 'ext_streamingResponse',
   render: async ({ trace, element }) => {
+    console.log('StreamingResponse extension render started', { trace })
+    
     const container = document.createElement('div')
     container.className = 'streaming-container'
 
@@ -265,8 +267,13 @@ export const StreamingResponseExtension = {
     answerSection.style.display = 'block'
     answerSection.classList.add('visible')
 
+    console.log('Container initialized, checking for messages')
+
     if (trace.payload?.messages) {
+      console.log('Found messages, starting stream')
       await streamResponse(trace.payload.messages)
+    } else {
+      console.log('No messages found in trace payload')
     }
     
     window.voiceflow.chat.interact({
@@ -284,6 +291,9 @@ async function streamResponse(messages) {
     const answerContent = container.querySelector('#answer-content')
     const answerSection = container.querySelector('.answer-section')
 
+    // Debug logging
+    console.log('Starting streamResponse with messages:', messages)
+
     // Initialize the sections properly
     streamingSection.style.display = 'block'
     answerSection.style.display = 'block'
@@ -292,20 +302,30 @@ async function streamResponse(messages) {
     // Show initial loading state
     answerContent.innerHTML = 'Connecting to Claude API...'
 
+    // Prepare the request payload according to server.js expectations
+    const payload = {
+      userData: messages[messages.length - 1].content, // Get the last message content
+      model: trace.payload?.model || 'claude-3-sonnet-20240229',
+      systemPrompt: "You are a helpful AI assistant.",
+      temperature: 0,
+      max_tokens: 4096
+    }
+
+    console.log('Sending request with payload:', payload)
+
     const response = await fetch('http://localhost:3000/api/claude/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        messages: messages,
-        model: trace.payload?.model || 'claude-3-sonnet-20240229',
-      }),
+      body: JSON.stringify(payload)
     })
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    console.log('Got response from server, starting to read stream')
 
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
@@ -315,18 +335,33 @@ async function streamResponse(messages) {
     while (true) {
       const { done, value } = await reader.read()
       
-      if (done) break
+      if (done) {
+        console.log('Stream complete')
+        break
+      }
       
       const chunk = decoder.decode(value)
-      buffer += chunk
+      console.log('Received chunk:', chunk)
 
-      // Update the UI with the new content
-      currentResponse += chunk
-      answerContent.innerHTML = markdownToHtml(currentResponse)
-      
-      // Make sure the content is visible
-      answerSection.style.display = 'block'
-      answerSection.classList.add('visible')
+      try {
+        // Split chunk into lines and process each SSE event
+        const lines = chunk.split('\n')
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const eventData = JSON.parse(line.slice(6))
+            if (eventData.type === 'content_block_delta') {
+              currentResponse += eventData.delta?.text || ''
+              answerContent.innerHTML = markdownToHtml(currentResponse)
+              
+              // Make sure the content is visible
+              answerSection.style.display = 'block'
+              answerSection.classList.add('visible')
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error processing chunk:', e)
+      }
     }
 
   } catch (error) {
