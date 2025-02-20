@@ -291,11 +291,7 @@ export const StreamingResponseExtension = {
         answerSection.style.display = 'block'
 
         try {
-          const baseUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : 'https://vysocina-hypedigitaly.replit.app';
-            
-          const response = await fetch(`${baseUrl}/api/claude/chat`, {
+          const response = await fetch('https://vysocina-hypedigitaly.replit.app/api/claude/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
