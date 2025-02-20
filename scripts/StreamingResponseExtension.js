@@ -282,25 +282,30 @@ export const StreamingResponseExtension = {
           stream: true
         }
 
-        // Create a safe version of the payload for display (mask sensitive data)
+        // Create a safe version of the payload for display
         const debugPayload = {
           ...requestPayload,
           apiKey: requestPayload.apiKey ? '****' + requestPayload.apiKey.slice(-4) : 'missing',
           messages: requestPayload.messages?.map(msg => ({
             role: msg.role,
-            content: msg.content.slice(0, 100) + '...' // Show truncated content
+            content: msg.content.slice(0, 100) + '...'
           }))
         }
         
-        // Display initial status with detailed debug info
-        answerContent.innerHTML = `
+        // Get the correct message container
+        const messageContainer = element.closest('.vfrc-message')
+        const streamingContainer = messageContainer.querySelector('.streaming-container')
+        const streamingContent = messageContainer.querySelector('#streaming-content')
+        const answerSection = messageContainer.querySelector('.answer-section')
+        
+        // Display initial status with debug info in the correct container
+        streamingContent.innerHTML = `
           <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
             <strong>Status:</strong> Connecting to Claude API...
             <div style="margin-top: 8px; font-family: monospace; font-size: 12px;">
               <strong>Request Details:</strong>
               <br>- Model: ${requestPayload.model || 'Not specified'}
               <br>- Max Tokens: ${requestPayload.max_tokens || 'Not specified'}
-              <br>- Temperature: ${requestPayload.temperature || 'Not specified'}
               <br>
               <details>
                 <summary>Debug Payload (Click to expand)</summary>
@@ -310,9 +315,11 @@ ${JSON.stringify(debugPayload, null, 2)}
               </details>
             </div>
           </div>
-          <div id="streaming-response"></div>
         `
 
+        // Make sure streaming section is visible during the process
+        streamingContainer.style.display = 'block'
+        
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -329,6 +336,10 @@ ${JSON.stringify(debugPayload, null, 2)}
           throw new Error(`API request failed: ${response.status} - ${errorData}`);
         }
 
+        // Once successful, hide debug info and show answer section
+        streamingContent.innerHTML = ''
+        answerSection.classList.add('visible')
+        
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
@@ -354,13 +365,14 @@ ${JSON.stringify(debugPayload, null, 2)}
 
             if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
               currentMarkdown += data.delta.text
-              streamingContent.innerHTML = markdownToHtml(currentMarkdown)
+              answerSection.querySelector('#answer-content').innerHTML = markdownToHtml(currentMarkdown)
             }
           }
         }
 
       } catch (error) {
-        answerContent.innerHTML = `
+        // Display error in the streaming content area
+        streamingContent.innerHTML = `
           <div style="background: #ffe6e6; padding: 12px; border-radius: 6px;">
             <strong>Error:</strong> ${error.message}
             <br><br>
