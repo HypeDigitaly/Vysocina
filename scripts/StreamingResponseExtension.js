@@ -278,6 +278,34 @@ export const StreamingResponseExtension = {
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
+        // Enhanced logging of the full trace payload
+        console.group('🔍 Detailed Payload Debug Info');
+        console.log('Full trace:', trace);
+        console.log('Trace payload:', trace.payload);
+        console.log('Messages:', messages);
+        console.table({
+          model: trace.payload?.model,
+          max_tokens: trace.payload?.max_tokens,
+          temperature: trace.payload?.temperature,
+          systemPrompt: trace.payload?.systemPrompt,
+          userData: trace.payload?.userData
+        });
+        console.groupEnd();
+
+        // Add visual debug info to UI
+        answerContent.innerHTML = `
+          <div style="font-family: monospace; padding: 12px; background: #1e1e1e; color: #fff; border-radius: 6px; margin-bottom: 12px;">
+            <h4 style="margin: 0 0 8px 0; color: #63B3ED;">📊 Debug Information</h4>
+            <pre style="margin: 0; white-space: pre-wrap;">
+Model: ${trace.payload?.model || 'undefined'}
+Max Tokens: ${trace.payload?.max_tokens || 'undefined'}
+Temperature: ${trace.payload?.temperature || 'undefined'}
+System Prompt: ${trace.payload?.systemPrompt || 'undefined'}
+User Data: ${trace.payload?.userData || 'undefined'}
+            </pre>
+          </div>
+        `;
+
         // Log initial Voiceflow payload
         console.log('🎬 Voiceflow Payload:', {
           model: trace.payload?.model,

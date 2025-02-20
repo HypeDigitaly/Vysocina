@@ -9,7 +9,25 @@ app.use(express.json());
 app.post('/api/claude/chat', async (req, res) => {
   try {
     const payload = req.body;
-    console.log('📨 Received client request:', payload);
+    
+    // Enhanced payload logging
+    console.group('🔍 Server Received Request');
+    console.log('Headers:', req.headers);
+    console.log('Full payload:', payload);
+    console.table({
+      model: payload.model,
+      max_tokens: payload.max_tokens,
+      temperature: payload.temperature,
+      systemPrompt: payload.systemPrompt,
+      userData: payload.userData
+    });
+    console.groupEnd();
+
+    // Validate required fields
+    if (!payload.userData) {
+      console.error('❌ Missing userData in payload:', payload);
+      throw new Error('Missing required field: userData');
+    }
 
     // Construct the request
     const requestBody = {
