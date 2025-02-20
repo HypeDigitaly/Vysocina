@@ -278,12 +278,6 @@ export const StreamingResponseExtension = {
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
-        // Add debug logging for initial call
-        console.log('Starting stream response with payload:', {
-          ...trace.payload,
-          apiKey: '[REDACTED]'
-        })
-
         const messageContainer = element.closest('.vfrc-message')
         if (!messageContainer) {
           throw new Error('Could not find message container')
@@ -310,22 +304,6 @@ export const StreamingResponseExtension = {
           ...trace.payload,
           stream: true
         }
-
-        // Add detailed API call logging
-        console.log('Making Claude API call with:', {
-          url: 'https://api.anthropic.com/v1/messages',
-          method: 'POST',
-          headers: {
-            'x-api-key': '[REDACTED]',
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-            'anthropic-beta': 'prompt-caching-2024-07-31'
-          },
-          fullPayload: {
-            ...requestPayload,
-            apiKey: '[REDACTED]'
-          }
-        });
 
         try {
           const response = await fetch('/api/claude/chat', {
