@@ -1,23 +1,37 @@
 const express = require('express');
 const cors = require('cors');
-const { StreamingTextResponse, Claude } = require('@anthropic-ai/sdk');
+const Anthropic = require('@anthropic-ai/sdk');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const claude = new Claude({
+const claude = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY
 });
 
 app.post('/api/claude/chat', async (req, res) => {
-  const { messages, model } = req.body;
-  
   try {
+    // Extract the relevant fields from Voiceflow's payload structure
+    const payload = req.body;
+    
+    // Construct the Claude API request
     const stream = await claude.messages.stream({
-      model: model,
-      messages: messages,
+      model: payload.model || 'claude-3-sonnet-20241022',
+      max_tokens: payload.max_tokens || 4096,
+      temperature: payload.temperature || 0,
+      system: [{
+        type: "text",
+        text: payload.systemPrompt || "You are a helpful AI assistant.",
+        cache_control: {
+          type: "ephemeral"
+        }
+      }],
+      messages: [{
+        role: "user",
+        content: payload.userData || ""
+      }],
       stream: true
     });
 

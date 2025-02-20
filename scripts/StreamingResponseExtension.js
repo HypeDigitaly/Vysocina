@@ -278,10 +278,32 @@ export const StreamingResponseExtension = {
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
+        console.log('🔵 Starting streamResponse with payload:', {
+          model: trace.payload?.model,
+          max_tokens: trace.payload?.max_tokens,
+          temperature: trace.payload?.temperature,
+          systemPrompt: trace.payload?.systemPrompt?.substring(0, 100) + '...',
+          userDataLength: trace.payload?.userData?.length
+        });
+
         const requestPayload = {
-          messages: messages,
-          model: trace.payload?.model || 'claude-3-sonnet-20240229'
+          model: trace.payload?.model || 'claude-3-sonnet-20241022',
+          max_tokens: trace.payload?.max_tokens || 4096,
+          temperature: trace.payload?.temperature || 0,
+          system: [{
+            type: "text",
+            text: trace.payload?.systemPrompt || "You are a helpful AI assistant.",
+            cache_control: {
+              type: "ephemeral"
+            }
+          }],
+          messages: [{
+            role: "user",
+            content: trace.payload?.userData || ""
+          }]
         };
+
+        console.log('🟡 Sending request to API with payload:', JSON.stringify(requestPayload, null, 2));
 
         const response = await fetch('http://localhost:3000/api/claude/chat', {
           method: 'POST',
@@ -291,25 +313,20 @@ export const StreamingResponseExtension = {
           body: JSON.stringify(requestPayload)
         });
 
-        // Add response status logging
-        console.log('Claude API response status:', {
+        console.log('🟢 API Response received:', {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries())
         });
 
-        let responseData = null;
-        let responseText = null;
-        
-        try {
-          responseText = await response.text();
-          responseData = JSON.parse(responseText);
-        } catch (parseError) {
-          // If JSON parsing fails, we'll show the raw text
-        }
-
         if (!response.ok) {
-          throw new Error(`API request failed (${response.status})`);
+          const errorText = await response.text();
+          console.error('❌ API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText
+          });
+          throw new Error(`API request failed (${response.status}): ${errorText}`);
         }
 
         // Update status for successful connection
@@ -317,43 +334,69 @@ export const StreamingResponseExtension = {
           <div style="padding: 8px;">
             <strong>Status:</strong> Connected, receiving stream...
           </div>
-        `
+        `;
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        let currentMarkdown = ''
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let currentMarkdown = '';
+        let chunkCounter = 0;
+        let totalCharacters = 0;
+
+        console.log('🟣 Beginning to read stream...');
 
         while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
+          const { done, value } = await reader.read();
+          if (done) break;
 
-          const chunk = decoder.decode(value)
-          let jsonBuffer = buffer + chunk
-          buffer = ''
+          const chunk = decoder.decode(value);
+          let jsonBuffer = buffer + chunk;
+          buffer = '';
 
-          const events = jsonBuffer.split('\n\n')
-          buffer = events.pop() || ''
+          const events = jsonBuffer.split('\n\n');
+          buffer = events.pop() || '';
 
           for (const event of events) {
-            if (!event.trim()) continue
+            if (!event.trim()) continue;
 
-            const eventLines = event.split('\n')
-            const eventType = eventLines[0].replace('event: ', '')
-            const data = JSON.parse(eventLines[1].replace('data: ', ''))
+            const eventLines = event.split('\n');
+            const eventType = eventLines[0].replace('event: ', '');
+            const data = JSON.parse(eventLines[1].replace('data: ', ''));
 
+            chunkCounter++;
             if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
-              currentMarkdown += data.delta.text
-              const answerContent = answerSection.querySelector('#answer-content')
+              currentMarkdown += data.delta.text;
+              totalCharacters += data.delta.text.length;
+
+              if (chunkCounter % 10 === 0) {  // Log every 10th chunk
+                console.log(`🟨 Processing chunk #${chunkCounter}, total characters: ${totalCharacters}`);
+              }
+
+              const answerContent = answerSection.querySelector('#answer-content');
               if (answerContent) {
-                answerContent.innerHTML = markdownToHtml(currentMarkdown)
+                answerContent.innerHTML = markdownToHtml(currentMarkdown);
               }
             }
           }
         }
 
+        console.log(`✅ Stream completed. Total chunks: ${chunkCounter}, Total characters: ${totalCharacters}`);
+
       } catch (error) {
-        console.error('Streaming error:', error);
+        console.error('❌ Streaming error:', {
+          message: error.message,
+          stack: error.stack,
+          details: error
+        });
+        
+        const answerContent = answerSection.querySelector('#answer-content');
+        if (answerContent) {
+          answerContent.innerHTML = `
+            <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
+              <strong>Error:</strong> ${error.message}
+            </div>
+          `;
+        }
       }
     }
 
