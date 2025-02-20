@@ -290,7 +290,13 @@ export const StreamingResponseExtension = {
 
         answerSection.style.display = "block";
 
+        console.log('🔵 [VF->Extension] Received payload:', trace.payload);
+        
         try {
+          console.log('🟡 [Extension->Backend] Sending request to backend...');
+          const requestBody = JSON.stringify(trace.payload);
+          console.log('Request body:', JSON.parse(requestBody));
+          
           const response = await fetch(
             "https://vysocina-hypedigitaly.replit.app/api/claude/chat",
             {
@@ -298,9 +304,13 @@ export const StreamingResponseExtension = {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(trace.payload),
+              body: requestBody,
             },
           );
+          console.log('🟢 [Backend->Extension] Received response:', {
+            status: response.status,
+            headers: Object.fromEntries(response.headers.entries())
+          });
 
           // Add response status logging
           console.log("Claude API response status:", {

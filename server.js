@@ -13,12 +13,17 @@ app.get('/', (req, res) => {
 const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 
 app.post('/api/claude/chat', async (req, res) => {
+  console.log('🟡 [Backend] Received request from client');
+  console.log('Request body:', req.body);
+  
   if (!CLAUDE_API_KEY) {
+    console.log('🔴 [Backend] Error: Claude API key not configured');
     res.status(500).json({ error: 'Claude API key not configured' });
     return;
   }
   
   try {
+    console.log('🟣 [Backend->Claude] Sending request to Claude API...');
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -43,11 +48,17 @@ app.post('/api/claude/chat', async (req, res) => {
 
     const reader = response.body.getReader();
     
+    console.log('🟢 [Claude->Backend] Starting to receive stream...');
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        console.log('🟢 [Claude->Backend] Stream complete');
+        break;
+      }
       
-      res.write(`data: ${Buffer.from(value).toString('utf8')}\n\n`);
+      const chunk = Buffer.from(value).toString('utf8');
+      console.log('🟢 [Claude->Backend] Chunk received:', chunk);
+      res.write(`data: ${chunk}\n\n`);
     }
     
     res.end();
