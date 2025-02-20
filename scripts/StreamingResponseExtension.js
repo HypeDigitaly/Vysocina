@@ -328,7 +328,7 @@ export const StreamingResponseExtension = {
         });
 
         try {
-          const response = await fetch('https://your-repl-url.repl.co/api/claude/chat', {
+          const response = await fetch('/api/claude/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
