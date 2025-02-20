@@ -290,35 +290,13 @@ export const StreamingResponseExtension = {
 
         answerSection.style.display = 'block'
 
-        // Validate API key first
-        if (!trace.payload?.apiKey || trace.payload.apiKey === '{claude_api_key_secret}') {
-          answerContent.innerHTML = `
-            <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fee2e2; padding: 12px; border-radius: 6px;">
-              <strong>Error:</strong> Invalid or missing API key
-            </div>
-          `
-          throw new Error('Invalid or missing API key')
-        }
-
-        const requestPayload = {
-          ...trace.payload,
-          stream: true
-        }
-
         try {
           const response = await fetch('/api/claude/chat', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              model: trace.payload.model,
-              max_tokens: trace.payload.max_tokens,
-              temperature: trace.payload.temperature,
-              system: trace.payload.system,
-              messages: trace.payload.messages,
-              stream: true
-            })
+            body: JSON.stringify(trace.payload)
           })
 
           // Add response status logging
