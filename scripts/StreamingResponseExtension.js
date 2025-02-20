@@ -328,15 +328,18 @@ export const StreamingResponseExtension = {
         });
 
         try {
-          const response = await fetch('https://api.anthropic.com/v1/messages', {
+          const response = await fetch('https://your-repl-url.repl.co/api/claude/chat', {
             method: 'POST',
             headers: {
-              'x-api-key': trace.payload.apiKey,
-              'anthropic-version': '2023-06-01',
-              'content-type': 'application/json',
-              'anthropic-beta': 'prompt-caching-2024-07-31'
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify(requestPayload)
+            body: JSON.stringify({
+              model: trace.payload.model,
+              max_tokens: trace.payload.max_tokens,
+              temperature: trace.payload.temperature,
+              system: trace.payload.system,
+              messages: trace.payload.messages
+            })
           })
 
           // Add response status logging
