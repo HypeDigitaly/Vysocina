@@ -316,7 +316,8 @@ export const StreamingResponseExtension = {
               max_tokens: trace.payload.max_tokens,
               temperature: trace.payload.temperature,
               system: trace.payload.system,
-              messages: trace.payload.messages
+              messages: trace.payload.messages,
+              stream: true
             })
           })
 
