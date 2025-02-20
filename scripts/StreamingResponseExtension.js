@@ -281,8 +281,18 @@ export const StreamingResponseExtension = {
           ...trace.payload,
           stream: true
         }
+
+        // Create a safe version of the payload for display (mask sensitive data)
+        const debugPayload = {
+          ...requestPayload,
+          apiKey: requestPayload.apiKey ? '****' + requestPayload.apiKey.slice(-4) : 'missing',
+          messages: requestPayload.messages?.map(msg => ({
+            role: msg.role,
+            content: msg.content.slice(0, 100) + '...' // Show truncated content
+          }))
+        }
         
-        // Display initial status
+        // Display initial status with detailed debug info
         answerContent.innerHTML = `
           <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
             <strong>Status:</strong> Connecting to Claude API...
@@ -290,6 +300,14 @@ export const StreamingResponseExtension = {
               <strong>Request Details:</strong>
               <br>- Model: ${requestPayload.model || 'Not specified'}
               <br>- Max Tokens: ${requestPayload.max_tokens || 'Not specified'}
+              <br>- Temperature: ${requestPayload.temperature || 'Not specified'}
+              <br>
+              <details>
+                <summary>Debug Payload (Click to expand)</summary>
+                <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
+${JSON.stringify(debugPayload, null, 2)}
+                </pre>
+              </details>
             </div>
           </div>
           <div id="streaming-response"></div>
@@ -352,6 +370,17 @@ export const StreamingResponseExtension = {
               <li>Verify the model name is correct</li>
               <li>Ensure the request payload is properly formatted</li>
             </ul>
+            <br>
+            <details>
+              <summary>Debug Information (Click to expand)</summary>
+              <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
+Request Payload:
+${JSON.stringify(debugPayload, null, 2)}
+
+Error Details:
+${error.stack || error.message}
+              </pre>
+            </details>
           </div>
         `
       }
