@@ -278,7 +278,7 @@ export const StreamingResponseExtension = {
     // Update the streamResponse function
     async function streamResponse(messages) {
       try {
-        // Add debug logging
+        // Add debug logging for initial call
         console.log('Starting stream response with payload:', {
           ...trace.payload,
           apiKey: '[REDACTED]'
@@ -311,15 +311,21 @@ export const StreamingResponseExtension = {
           stream: true
         }
 
-        // Create a sanitized version of the payload for display
-        const displayPayload = {
-          ...requestPayload,
-          apiKey: requestPayload.apiKey ? '****' + requestPayload.apiKey.slice(-4) : 'missing',
-          messages: requestPayload.messages?.map(msg => ({
-            role: msg.role,
-            content: msg.content.slice(0, 100) + (msg.content.length > 100 ? '...' : '')
-          }))
-        }
+        // Add detailed API call logging
+        console.log('Making Claude API call with:', {
+          url: 'https://api.anthropic.com/v1/messages',
+          method: 'POST',
+          headers: {
+            'x-api-key': '[REDACTED]',
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+            'anthropic-beta': 'prompt-caching-2024-07-31'
+          },
+          fullPayload: {
+            ...requestPayload,
+            apiKey: '[REDACTED]'
+          }
+        });
 
         try {
           const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -332,6 +338,13 @@ export const StreamingResponseExtension = {
             },
             body: JSON.stringify(requestPayload)
           })
+
+          // Add response status logging
+          console.log('Claude API response status:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
+          });
 
           let responseData = null;
           let responseText = null;
