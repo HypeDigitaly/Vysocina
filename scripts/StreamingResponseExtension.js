@@ -272,9 +272,36 @@ export const StreamingResponseExtension = {
     // Update the streaming function to show debug info first
     async function streamResponse(messages) {
       try {
-        // Validate API key first
+        // Get the correct message container first
+        const messageContainer = element.closest('.vfrc-message')
+        if (!messageContainer) {
+          throw new Error('Could not find message container')
+        }
+
+        // Force show the streaming container and sections
+        const streamingSection = messageContainer.querySelector('.streaming-section')
+        const streamingContent = messageContainer.querySelector('#streaming-content')
+        const answerSection = messageContainer.querySelector('.answer-section')
+        
+        if (!streamingSection || !streamingContent || !answerSection) {
+          throw new Error('Required elements not found in DOM')
+        }
+
+        // Make everything visible
+        streamingSection.style.display = 'block'
+        streamingContent.style.display = 'block'
+        answerSection.style.display = 'block'
+
+        // Log visibility state for debugging
+        console.log('Container visibility:', {
+          streamingSection: streamingSection.style.display,
+          streamingContent: streamingContent.style.display,
+          answerSection: answerSection.style.display
+        })
+
+        // Validate API key
         if (!trace.payload?.apiKey || trace.payload.apiKey === '{claude_api_key_secret}') {
-          throw new Error('Invalid or missing API key');
+          throw new Error('Invalid or missing API key')
         }
 
         const requestPayload = {
@@ -282,7 +309,6 @@ export const StreamingResponseExtension = {
           stream: true
         }
 
-        // Create a safe version of the payload for display
         const debugPayload = {
           ...requestPayload,
           apiKey: requestPayload.apiKey ? '****' + requestPayload.apiKey.slice(-4) : 'missing',
@@ -291,24 +317,18 @@ export const StreamingResponseExtension = {
             content: msg.content.slice(0, 100) + '...'
           }))
         }
-        
-        // Get the correct message container
-        const messageContainer = element.closest('.vfrc-message')
-        const streamingContainer = messageContainer.querySelector('.streaming-container')
-        const streamingContent = messageContainer.querySelector('#streaming-content')
-        const answerSection = messageContainer.querySelector('.answer-section')
-        
-        // Display initial status with debug info in the correct container
+
+        // Show initial debug info
         streamingContent.innerHTML = `
           <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
-            <strong>Status:</strong> Connecting to Claude API...
+            <strong>Status:</strong> Initializing Claude API connection...
             <div style="margin-top: 8px; font-family: monospace; font-size: 12px;">
               <strong>Request Details:</strong>
               <br>- Model: ${requestPayload.model || 'Not specified'}
               <br>- Max Tokens: ${requestPayload.max_tokens || 'Not specified'}
               <br>
-              <details>
-                <summary>Debug Payload (Click to expand)</summary>
+              <details open>
+                <summary>Debug Payload</summary>
                 <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
 ${JSON.stringify(debugPayload, null, 2)}
                 </pre>
@@ -317,9 +337,13 @@ ${JSON.stringify(debugPayload, null, 2)}
           </div>
         `
 
-        // Make sure streaming section is visible during the process
-        streamingContainer.style.display = 'block'
-        
+        // Update status before API call
+        streamingContent.innerHTML += `
+          <div style="padding: 8px;">
+            <strong>Status:</strong> Making API request...
+          </div>
+        `
+
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -332,14 +356,17 @@ ${JSON.stringify(debugPayload, null, 2)}
         })
 
         if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`API request failed: ${response.status} - ${errorData}`);
+          const errorData = await response.text()
+          throw new Error(`API request failed: ${response.status} - ${errorData}`)
         }
 
-        // Once successful, hide debug info and show answer section
-        streamingContent.innerHTML = ''
-        answerSection.classList.add('visible')
-        
+        // Update status for successful connection
+        streamingContent.innerHTML += `
+          <div style="padding: 8px;">
+            <strong>Status:</strong> Connected, receiving stream...
+          </div>
+        `
+
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
         let buffer = ''
@@ -365,36 +392,43 @@ ${JSON.stringify(debugPayload, null, 2)}
 
             if (eventType === 'content_block_delta' && data.delta?.type === 'text_delta') {
               currentMarkdown += data.delta.text
-              answerSection.querySelector('#answer-content').innerHTML = markdownToHtml(currentMarkdown)
+              const answerContent = answerSection.querySelector('#answer-content')
+              if (answerContent) {
+                answerContent.innerHTML = markdownToHtml(currentMarkdown)
+              }
             }
           }
         }
 
       } catch (error) {
-        // Display error in the streaming content area
-        streamingContent.innerHTML = `
-          <div style="background: #ffe6e6; padding: 12px; border-radius: 6px;">
-            <strong>Error:</strong> ${error.message}
-            <br><br>
-            <strong>Troubleshooting:</strong>
-            <ul style="margin-top: 8px;">
-              <li>Check if the API key is properly configured</li>
-              <li>Verify the model name is correct</li>
-              <li>Ensure the request payload is properly formatted</li>
-            </ul>
-            <br>
-            <details>
-              <summary>Debug Information (Click to expand)</summary>
-              <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
-Request Payload:
-${JSON.stringify(debugPayload, null, 2)}
-
+        console.error('Streaming Response Error:', error)
+        
+        // Get elements again in case they were lost
+        const messageContainer = element.closest('.vfrc-message')
+        const streamingContent = messageContainer.querySelector('#streaming-content')
+        
+        if (streamingContent) {
+          streamingContent.innerHTML = `
+            <div style="background: #ffe6e6; padding: 12px; border-radius: 6px;">
+              <strong>Error:</strong> ${error.message}
+              <br><br>
+              <strong>Troubleshooting:</strong>
+              <ul style="margin-top: 8px;">
+                <li>Check if the API key is properly configured</li>
+                <li>Verify the model name is correct</li>
+                <li>Ensure the request payload is properly formatted</li>
+              </ul>
+              <br>
+              <details open>
+                <summary>Debug Information</summary>
+                <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
 Error Details:
 ${error.stack || error.message}
-              </pre>
-            </details>
-          </div>
-        `
+                </pre>
+              </details>
+            </div>
+          `
+        }
       }
     }
 
