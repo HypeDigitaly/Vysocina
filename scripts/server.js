@@ -1,69 +1,86 @@
 const express = require('express');
 const cors = require('cors');
-const { createServer } = require('http');
 require('dotenv').config();
 
 const app = express();
-const server = createServer(app);
-
-// CORS configuration
-app.use(cors({
-  origin: ['https://hypedigitaly.ai', 'https://hypedigitaly.github.io'],
-  methods: ['POST'],
-  allowedHeaders: ['Content-Type']
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-// Claude API proxy endpoint
 app.post('/api/claude/chat', async (req, res) => {
   try {
+    const payload = req.body;
+    console.log('📨 Received client request:', payload);
+
+    // Construct the request
+    const requestBody = {
+      model: payload.model || 'claude-3-sonnet-20241022',
+      max_tokens: payload.max_tokens || 4096,
+      temperature: payload.temperature || 0,
+      system: [{
+        type: "text",
+        text: payload.systemPrompt || "You are a helpful AI assistant.",
+        cache_control: { type: "ephemeral" }
+      }],
+      messages: [{
+        role: "user",
+        content: payload.userData || ""
+      }]
+    };
+
+    console.log('🔄 Prepared Claude API request:', requestBody);
+
+    // Make the API call
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': process.env.CLAUDE_API_KEY,
         'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        'anthropic-beta': 'prompt-caching-2024-07-31'
       },
-      body: JSON.stringify({
-        messages: req.body.messages,
-        model: req.body.model || 'claude-3-sonnet-20240229',
-        stream: true
-      })
+      body: JSON.stringify(requestBody)
     });
 
-    // Pipe the streaming response back to client
-    response.body.pipe(res);
+    console.log('📥 Claude API response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Claude API Error:', errorText);
+      throw new Error(`Claude API request failed (${response.status}): ${errorText}`);
+    }
+
+    // Set up streaming response
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    console.log('📡 Starting stream to client...');
+
+    let chunkCount = 0;
+    for await (const chunk of response.body) {
+      chunkCount++;
+      if (chunk.type === 'content_block_delta') {
+        res.write(`event: content_block_delta\n`);
+        res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+        
+        if (chunkCount % 20 === 0) {
+          console.log(`📊 Streamed ${chunkCount} chunks`);
+        }
+      }
+    }
+
+    console.log('✅ Stream completed:', { totalChunks: chunkCount });
+    res.end();
   } catch (error) {
-    res.status(500).json({ error: 'Failed to communicate with Claude API' });
+    console.error('🚨 Server Error:', {
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: err.message
-  });
-});
-
-// Start server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
 }); 
