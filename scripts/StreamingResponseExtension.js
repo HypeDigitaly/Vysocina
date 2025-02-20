@@ -262,42 +262,30 @@ export const StreamingResponseExtension = {
     const answerContent = container.querySelector('#answer-content')
     const answerSection = container.querySelector('.answer-section')
 
-    // Hide streaming section as it's only for reasoning
+    // Hide the streaming section completely
     streamingSection.style.display = 'none'
     
-    // Show answer section immediately
+    // Show answer section immediately and style it to be at the parent level
     answerSection.classList.add('visible')
     answerSection.style.display = 'block'
+    answerSection.style.padding = '0'
+    answerSection.style.margin = '0'
 
-    // Update the streaming function to show debug info first
+    // Update the streamResponse function
     async function streamResponse(messages) {
       try {
-        // Get the correct message container first
         const messageContainer = element.closest('.vfrc-message')
         if (!messageContainer) {
           throw new Error('Could not find message container')
         }
 
-        // Force show the streaming container and sections
-        const streamingSection = messageContainer.querySelector('.streaming-section')
-        const streamingContent = messageContainer.querySelector('#streaming-content')
+        // Only show the answer section, keep streaming section hidden
         const answerSection = messageContainer.querySelector('.answer-section')
-        
-        if (!streamingSection || !streamingContent || !answerSection) {
-          throw new Error('Required elements not found in DOM')
+        if (!answerSection) {
+          throw new Error('Answer section not found in DOM')
         }
 
-        // Make everything visible
-        streamingSection.style.display = 'block'
-        streamingContent.style.display = 'block'
         answerSection.style.display = 'block'
-
-        // Log visibility state for debugging
-        console.log('Container visibility:', {
-          streamingSection: streamingSection.style.display,
-          streamingContent: streamingContent.style.display,
-          answerSection: answerSection.style.display
-        })
 
         // Validate API key
         if (!trace.payload?.apiKey || trace.payload.apiKey === '{claude_api_key_secret}') {
@@ -403,29 +391,12 @@ ${JSON.stringify(debugPayload, null, 2)}
       } catch (error) {
         console.error('Streaming Response Error:', error)
         
-        // Get elements again in case they were lost
-        const messageContainer = element.closest('.vfrc-message')
-        const streamingContent = messageContainer.querySelector('#streaming-content')
-        
-        if (streamingContent) {
-          streamingContent.innerHTML = `
-            <div style="background: #ffe6e6; padding: 12px; border-radius: 6px;">
+        // Show error directly in the answer section
+        const answerContent = container.querySelector('#answer-content')
+        if (answerContent) {
+          answerContent.innerHTML = `
+            <div style="color: #ef4444;">
               <strong>Error:</strong> ${error.message}
-              <br><br>
-              <strong>Troubleshooting:</strong>
-              <ul style="margin-top: 8px;">
-                <li>Check if the API key is properly configured</li>
-                <li>Verify the model name is correct</li>
-                <li>Ensure the request payload is properly formatted</li>
-              </ul>
-              <br>
-              <details open>
-                <summary>Debug Information</summary>
-                <pre style="background: #fff; padding: 8px; margin-top: 8px; overflow-x: auto;">
-Error Details:
-${error.stack || error.message}
-                </pre>
-              </details>
             </div>
           `
         }
