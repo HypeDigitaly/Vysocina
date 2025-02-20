@@ -276,7 +276,7 @@ export const StreamingResponseExtension = {
     answerContent.style.color = '#374151'
 
     // Update the streamResponse function
-    async function streamResponse(messages) {
+    async function streamResponse() {
       try {
         const messageContainer = element.closest('.vfrc-message')
         if (!messageContainer) {
@@ -306,12 +306,10 @@ export const StreamingResponseExtension = {
             headers: Object.fromEntries(response.headers.entries())
           });
 
-          let responseData = null;
           let responseText = null;
           
           try {
             responseText = await response.text();
-            responseData = JSON.parse(responseText);
           } catch (parseError) {
             // If JSON parsing fails, we'll show the raw text
           }
