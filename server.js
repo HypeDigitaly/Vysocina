@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
 
 const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 
-app.post('https://vysocina-hypedigitaly.replit.app', async (req, res) => {
+app.post('/api/claude/chat', async (req, res) => {
   if (!CLAUDE_API_KEY) {
     res.status(500).json({ error: 'Claude API key not configured' });
     return;

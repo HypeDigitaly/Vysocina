@@ -292,7 +292,7 @@ export const StreamingResponseExtension = {
 
         try {
           const response = await fetch(
-            "https://vysocina-hypedigitaly.replit.app",
+            "https://vysocina-hypedigitaly.replit.app/api/claude/chat",
             {
               method: "POST",
               headers: {
