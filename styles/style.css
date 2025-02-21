@@ -35,7 +35,7 @@
 }
 
 /* Styles for opened state - button with arrow */
-.vfrc-launcher.f6dof8t:not(:has(.f6dof8t.f6dof8v.f6dof8g)) {
+button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 {
   width: 42px !important;
   height: 42px !important;
   background-color: #6EBC43 !important;
@@ -52,7 +52,7 @@
 }
 
 /* Arrow SVG in opened state */
-.vfrc-launcher.f6dof8t:not(:has(.f6dof8t.f6dof8v.f6dof8g)) svg {
+button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 svg {
   width: 24px !important;
   height: 24px !important;
   transform: none !important;
@@ -60,7 +60,7 @@
 }
 
 /* Container for the arrow */
-.f6dof86.f6dof88:has(svg[viewBox="0 0 32 32"]) {
+.f6dof86.f6dof88 {
   width: 24px !important;
   height: 24px !important;
   display: flex !important;
