@@ -1,34 +1,11 @@
-/**
- * Device fingerprinting implementation
- * Combines hardware information, browser characteristics, and IP address
- * to create a stable and unique identifier across sessions
- */
-class DeviceFingerprint {
+// fingerprint.js
+class StableDeviceFingerprint {
     constructor() {
         this.components = [];
+        this.ipAddress = null;
     }
 
-    /**
-     * Fetches user's IP address from ipify API
-     */
-    async getUserIP() {
-        try {
-            const response = await fetch('https://api.ipify.org/?format=json');
-            const data = await response.json();
-            console.log("User IP Address:", data.ip);
-            if (!data.ip) {
-                throw new Error('IP address not received');
-            }
-            return data.ip;
-        } catch (error) {
-            console.error('Error fetching IP:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Hardware-specific methods
-     */
+    // Hardware-specific methods
     getCPU() {
         const ua = navigator.userAgent;
         if (ua.includes("x64") || ua.includes("x86_64")) return "x64";
@@ -49,9 +26,7 @@ class DeviceFingerprint {
         return window.screen.colorDepth;
     }
 
-    /**
-     * OS-specific methods
-     */
+    // OS-specific methods
     getOS() {
         const ua = navigator.userAgent;
         if (ua.includes("Windows")) return "Windows";
@@ -85,9 +60,7 @@ class DeviceFingerprint {
         return match ? match[1].replace(/_/g, '.') : "Unknown";
     }
 
-    /**
-     * Device-specific methods
-     */
+    // Device-specific methods
     getDevice() {
         if (this.isMobile()) {
             const ua = navigator.userAgent;
@@ -110,30 +83,109 @@ class DeviceFingerprint {
         return /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
 
-    /**
-     * Hardware feature detection
-     */
+    // Canvas fingerprinting (hardware-dependent)
+    getCanvasFingerprint() {
+        const canvas = document.createElement('canvas');
+        if (!canvas.getContext) return null;
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = 220;
+        canvas.height = 30;
+
+        // Text with special characters
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        
+        // Mixing fill styles
+        ctx.fillStyle = "#069";
+        ctx.font = "15px 'Arial'";
+        ctx.fillText("ClientJS<canvas>", 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.font = "16px 'Arial'";
+        ctx.fillText("ClientJS<canvas>", 4, 17);
+
+        // Draw a complex shape
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+        ctx.fill();
+
+        return canvas.toDataURL();
+    }
+
+    // Hardware features
     getHardwareFeatures() {
         return {
             hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
             deviceMemory: navigator.deviceMemory || 'unknown',
-            maxTouchPoints: navigator.maxTouchPoints || 'unknown',
-            pixelRatio: window.devicePixelRatio || 'unknown'
+            maxTouchPoints: navigator.maxTouchPoints || 'unknown'
         };
     }
 
-    /**
-     * Browser-specific characteristics
-     */
+    // Browser language detection
     getBrowserLanguage() {
         return navigator.language || navigator.userLanguage || "Unknown";
     }
 
-    /**
-     * Collect all components for fingerprinting
-     */
+    // Add new method to get IP
+    async getIPAddress() {
+        try {
+            const response = await fetch('https://api.ipify.org/?format=json');
+            const data = await response.json();
+            console.log("User IP Address:", data.ip);
+            if (!data.ip) {
+                throw new Error('IP address not received');
+            }
+            this.ipAddress = data.ip;
+            return data.ip;
+        } catch (error) {
+            console.error('Error fetching IP:', error);
+            this.ipAddress = null;
+            return null;
+        }
+    }
+
+    // Modify calculateFingerprint to be async
+    async calculateFingerprint() {
+        // Get IP address first
+        await this.getIPAddress();
+        
+        // Collect stable components
+        this.components = [
+            this.ipAddress, // Add IP address as first component
+            this.getCPU(),
+            this.getCurrentResolution(),
+            this.getAvailableResolution(),
+            this.getColorDepth().toString(),
+            this.getOS(),
+            this.getOSVersion(),
+            this.getDevice(),
+            this.getDeviceType(),
+            this.getCanvasFingerprint(),
+            JSON.stringify(this.getHardwareFeatures())
+        ];
+
+        // Generate hash
+        return this.generateHash(this.components.join('###'));
+    }
+
+    generateHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return Math.abs(hash);
+    }
+
     getAllComponents() {
         const components = {
+            ipAddress: this.ipAddress, // Add IP address to components
             cpu: this.getCPU(),
             currentResolution: this.getCurrentResolution(),
             availableResolution: this.getAvailableResolution(),
@@ -144,11 +196,12 @@ class DeviceFingerprint {
             deviceType: this.getDeviceType(),
             hardwareFeatures: this.getHardwareFeatures(),
             isMobile: this.isMobile(),
-            browserLanguage: this.getBrowserLanguage()
+            browserLanguage: this.getBrowserLanguage() // Added browser language as component
         };
 
-        // Log all components
+        // Modify logging to include IP
         console.log("Device Fingerprint Components:");
+        console.log("- IP Address:", components.ipAddress);
         console.log("- CPU Architecture:", components.cpu);
         console.log("- Screen Resolution:", components.currentResolution);
         console.log("- Available Resolution:", components.availableResolution);
@@ -162,89 +215,18 @@ class DeviceFingerprint {
 
         return components;
     }
-
-    /**
-     * Generate cryptographic hash
-     */
-    async generateHash(data) {
-        try {
-            const encoder = new TextEncoder();
-            const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return btoa(String.fromCharCode(...hashArray))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-        } catch (error) {
-            console.error('Hash generation failed:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Calculate final fingerprint
-     */
-    async calculateFingerprint() {
-        try {
-            // Get IP address
-            const ipAddress = await this.getUserIP();
-            if (!ipAddress) {
-                console.warn("Warning: IP address not available");
-            }
-
-            // Get all components
-            const components = this.getAllComponents();
-
-            // Create stable string for hashing
-            const rawData = {
-                hw: {
-                    cpu: components.cpu,
-                    screen: {
-                        resolution: components.currentResolution,
-                        available: components.availableResolution,
-                        colorDepth: components.colorDepth
-                    },
-                    hardware: components.hardwareFeatures,
-                    isMobile: components.isMobile
-                },
-                sys: {
-                    os: components.os,
-                    osVersion: components.osVersion,
-                    device: components.device,
-                    deviceType: components.deviceType,
-                    language: components.browserLanguage
-                },
-                net: {
-                    ip: ipAddress || 'unknown',
-                    subnet: ipAddress ? ipAddress.split('.').slice(0, 3).join('.') : 'unknown'
-                }
-            };
-
-            console.log('Raw fingerprint data:', rawData);
-            const stableString = JSON.stringify(rawData);
-            const fingerprint = await this.generateHash(stableString);
-
-            return {
-                fingerprint,
-                components
-            };
-        } catch (error) {
-            console.error('Error during fingerprint generation:', error);
-            throw new Error('Fingerprint generation failed');
-        }
-    }
 }
 
-/**
- * Main export function
- * Returns an object containing the fingerprint and all components
- */
+// Modify the export function to be async
 export const generateFingerprint = async () => {
-    try {
-        const fingerprinter = new DeviceFingerprint();
-        return await fingerprinter.calculateFingerprint();
-    } catch (error) {
-        console.error('Fingerprint generation error:', error);
-        throw error;
-    }
+    const fingerprinter = new StableDeviceFingerprint();
+    const fingerprint = await fingerprinter.calculateFingerprint();
+    const components = fingerprinter.getAllComponents();
+
+    console.log("Generated Device Fingerprint:", fingerprint);
+    
+    return {
+        fingerprint,
+        components
+    };
 };
