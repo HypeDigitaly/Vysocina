@@ -89,30 +89,32 @@ class StableDeviceFingerprint {
         if (!canvas.getContext) return null;
         
         const ctx = canvas.getContext('2d');
-        canvas.width = 220;
-        canvas.height = 30;
+        canvas.width = 280;
+        canvas.height = 60;
 
-        // Text with special characters
+        // Add more complex drawing operations
         ctx.textBaseline = "alphabetic";
         ctx.fillStyle = "#f60";
         ctx.fillRect(125, 1, 62, 20);
         
-        // Mixing fill styles
+        // Add company name and special characters for more uniqueness
         ctx.fillStyle = "#069";
         ctx.font = "15px 'Arial'";
-        ctx.fillText("ClientJS<canvas>", 2, 15);
+        ctx.fillText("🌟 HypeDigitaly s.r.o. fingerprint ©®™", 2, 15);
         ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
         ctx.font = "16px 'Arial'";
-        ctx.fillText("ClientJS<canvas>", 4, 17);
+        ctx.fillText("¶ Test †‡§", 4, 35);
 
-        // Draw a complex shape
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(canvas.width, canvas.height);
-        ctx.lineTo(0, canvas.height);
-        ctx.closePath();
-        ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
-        ctx.fill();
+        // Add WebGL context if available
+        try {
+            const webgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (webgl) {
+                const debugInfo = webgl.getExtension('WEBGL_debug_renderer_info');
+                if (debugInfo) {
+                    ctx.fillText(webgl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL), 4, 50);
+                }
+            }
+        } catch (e) {}
 
         return canvas.toDataURL();
     }
@@ -149,14 +151,42 @@ class StableDeviceFingerprint {
         }
     }
 
+    // Add audio fingerprinting
+    getAudioFingerprint() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const analyser = audioContext.createAnalyser();
+            const gainNode = audioContext.createGain();
+            const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+            
+            gainNode.gain.value = 0; // Mute the sound
+            oscillator.type = 'triangle';
+            oscillator.connect(analyser);
+            analyser.connect(scriptProcessor);
+            scriptProcessor.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start(0);
+            
+            const audioData = new Float32Array(analyser.frequencyBinCount);
+            analyser.getFloatFrequencyData(audioData);
+            
+            oscillator.stop();
+            audioContext.close();
+            
+            return audioData.slice(0, 5).join(',');
+        } catch (e) {
+            return null;
+        }
+    }
+
     // Modify calculateFingerprint to be async
     async calculateFingerprint() {
-        // Get IP address first
         await this.getIPAddress();
         
-        // Collect stable components
+        // Collect stable components with additional entropy
         this.components = [
-            this.ipAddress, // Add IP address as first component
             this.getCPU(),
             this.getCurrentResolution(),
             this.getAvailableResolution(),
@@ -166,21 +196,28 @@ class StableDeviceFingerprint {
             this.getDevice(),
             this.getDeviceType(),
             this.getCanvasFingerprint(),
-            JSON.stringify(this.getHardwareFeatures())
+            this.getAudioFingerprint(),
+            JSON.stringify(this.getHardwareFeatures()),
+            navigator.plugins.length.toString(),
+            Array.from(navigator.plugins, p => p.name).join(','),
+            navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack,
+            Intl.DateTimeFormat().resolvedOptions().timeZone,
+            screen.pixelDepth.toString(),
+            navigator.hardwareConcurrency.toString(),
+            // Add IP as a separate component for filtering but not as primary identifier
+            this.ipAddress
         ];
 
         // Generate hash
         return this.generateHash(this.components.join('###'));
     }
 
-    generateHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return Math.abs(hash);
+    async generateHash(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     getAllComponents() {
