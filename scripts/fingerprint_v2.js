@@ -1,9 +1,9 @@
 /**
- * Enhanced device fingerprinting implementation
+ * Device fingerprinting implementation
  * Combines hardware information, browser characteristics, and IP address
  * to create a stable and unique identifier across sessions
  */
-class EnhancedDeviceFingerprint {
+class DeviceFingerprint {
     constructor() {
         this.components = [];
     }
@@ -111,7 +111,7 @@ class EnhancedDeviceFingerprint {
     }
 
     /**
-     * Enhanced hardware feature detection
+     * Hardware feature detection
      */
     getHardwareFeatures() {
         return {
@@ -130,67 +130,6 @@ class EnhancedDeviceFingerprint {
     }
 
     /**
-     * Enhanced canvas fingerprinting
-     */
-    getCanvasFingerprint() {
-        try {
-            const canvas = document.createElement('canvas');
-            if (!canvas.getContext) return null;
-            
-            const ctx = canvas.getContext('2d');
-            canvas.width = 240;
-            canvas.height = 140;
-
-            // Text with special characters
-            ctx.textBaseline = "alphabetic";
-            ctx.fillStyle = "#f60";
-            ctx.fillRect(125, 1, 62, 20);
-            
-            // Mixing fill styles
-            ctx.fillStyle = "#069";
-            ctx.font = "15px 'Arial'";
-            ctx.fillText("Fingerprint", 2, 15);
-            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-            ctx.font = "16px 'Arial'";
-            ctx.fillText("👨‍💻Test∑∆", 4, 17);
-
-            // Complex shape with gradient
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, "#FF0000");
-            gradient.addColorStop(1, "#00FF00");
-            ctx.fillStyle = gradient;
-            
-            ctx.beginPath();
-            ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.fill();
-
-            return canvas.toDataURL();
-        } catch (e) {
-            return null;
-        }
-    }
-
-    /**
-     * WebGL fingerprinting
-     */
-    getWebGLFingerprint() {
-        try {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (!gl) return null;
-
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            return debugInfo ? {
-                vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
-                renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
-            } : null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    /**
      * Collect all components for fingerprinting
      */
     getAllComponents() {
@@ -205,12 +144,10 @@ class EnhancedDeviceFingerprint {
             deviceType: this.getDeviceType(),
             hardwareFeatures: this.getHardwareFeatures(),
             isMobile: this.isMobile(),
-            browserLanguage: this.getBrowserLanguage(),
-            canvas: this.getCanvasFingerprint(),
-            webgl: this.getWebGLFingerprint()
+            browserLanguage: this.getBrowserLanguage()
         };
 
-        // Log all components in original style
+        // Log all components
         console.log("Device Fingerprint Components:");
         console.log("- CPU Architecture:", components.cpu);
         console.log("- Screen Resolution:", components.currentResolution);
@@ -230,77 +167,71 @@ class EnhancedDeviceFingerprint {
      * Generate cryptographic hash
      */
     async generateHash(data) {
-        const encoder = new TextEncoder();
-        const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return btoa(String.fromCharCode(...hashArray))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+        try {
+            const encoder = new TextEncoder();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return btoa(String.fromCharCode(...hashArray))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        } catch (error) {
+            console.error('Hash generation failed:', error);
+            throw error;
+        }
     }
 
     /**
      * Calculate final fingerprint
      */
     async calculateFingerprint() {
-        // Get IP address
-        const ipAddress = await this.getUserIP();
-        if (!ipAddress) {
-            console.warn("Warning: IP address not available, fingerprint may be less reliable");
-        }
-
-        // Get all components
-        const components = this.getAllComponents();
-        
-        // Add IP to components if available
-        if (ipAddress) {
-            components.ip = ipAddress;
-            console.log("- IP Address:", ipAddress);
-        }
-
-        // Create stable string for hashing
-        const stableString = JSON.stringify({
-            // Hardware identifiers
-            hw: {
-                cpu: components.cpu,
-                screen: {
-                    resolution: components.currentResolution,
-                    available: components.availableResolution,
-                    colorDepth: components.colorDepth
-                },
-                hardware: components.hardwareFeatures,
-                isMobile: components.isMobile,
-                gpu: components.webgl
-            },
-            // System identifiers
-            sys: {
-                os: components.os,
-                osVersion: components.osVersion,
-                device: components.device,
-                deviceType: components.deviceType,
-                language: components.browserLanguage
-            },
-            // Network identifiers
-            net: {
-                ip: ipAddress || 'unknown',
-                subnet: ipAddress ? ipAddress.split('.').slice(0, 3).join('.') : 'unknown'
-            },
-            // Graphics identifiers
-            graphics: {
-                canvas: components.canvas
+        try {
+            // Get IP address
+            const ipAddress = await this.getUserIP();
+            if (!ipAddress) {
+                console.warn("Warning: IP address not available");
             }
-        });
 
-        // Generate fingerprint
-        const fingerprint = await this.generateHash(stableString);
-        
-        // Log the final fingerprint
-        console.log("Generated Device Fingerprint:", fingerprint);
+            // Get all components
+            const components = this.getAllComponents();
 
-        return {
-            fingerprint,
-            components
-        };
+            // Create stable string for hashing
+            const rawData = {
+                hw: {
+                    cpu: components.cpu,
+                    screen: {
+                        resolution: components.currentResolution,
+                        available: components.availableResolution,
+                        colorDepth: components.colorDepth
+                    },
+                    hardware: components.hardwareFeatures,
+                    isMobile: components.isMobile
+                },
+                sys: {
+                    os: components.os,
+                    osVersion: components.osVersion,
+                    device: components.device,
+                    deviceType: components.deviceType,
+                    language: components.browserLanguage
+                },
+                net: {
+                    ip: ipAddress || 'unknown',
+                    subnet: ipAddress ? ipAddress.split('.').slice(0, 3).join('.') : 'unknown'
+                }
+            };
+
+            console.log('Raw fingerprint data:', rawData);
+            const stableString = JSON.stringify(rawData);
+            const fingerprint = await this.generateHash(stableString);
+
+            return {
+                fingerprint,
+                components
+            };
+        } catch (error) {
+            console.error('Error during fingerprint generation:', error);
+            throw new Error('Fingerprint generation failed');
+        }
     }
 }
 
@@ -309,6 +240,11 @@ class EnhancedDeviceFingerprint {
  * Returns an object containing the fingerprint and all components
  */
 export const generateFingerprint = async () => {
-    const fingerprinter = new EnhancedDeviceFingerprint();
-    return await fingerprinter.calculateFingerprint();
+    try {
+        const fingerprinter = new DeviceFingerprint();
+        return await fingerprinter.calculateFingerprint();
+    } catch (error) {
+        console.error('Fingerprint generation error:', error);
+        throw error;
+    }
 };
