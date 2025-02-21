@@ -151,36 +151,6 @@ class StableDeviceFingerprint {
         }
     }
 
-    // Add audio fingerprinting
-    getAudioFingerprint() {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const analyser = audioContext.createAnalyser();
-            const gainNode = audioContext.createGain();
-            const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-            
-            gainNode.gain.value = 0; // Mute the sound
-            oscillator.type = 'triangle';
-            oscillator.connect(analyser);
-            analyser.connect(scriptProcessor);
-            scriptProcessor.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start(0);
-            
-            const audioData = new Float32Array(analyser.frequencyBinCount);
-            analyser.getFloatFrequencyData(audioData);
-            
-            oscillator.stop();
-            audioContext.close();
-            
-            return audioData.slice(0, 5).join(',');
-        } catch (e) {
-            return null;
-        }
-    }
-
     // Modify calculateFingerprint to be async
     async calculateFingerprint() {
         await this.getIPAddress();
@@ -196,15 +166,11 @@ class StableDeviceFingerprint {
             this.getDevice(),
             this.getDeviceType(),
             this.getCanvasFingerprint(),
-            this.getAudioFingerprint(),
             JSON.stringify(this.getHardwareFeatures()),
-            navigator.plugins.length.toString(),
-            Array.from(navigator.plugins, p => p.name).join(','),
             navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack,
             Intl.DateTimeFormat().resolvedOptions().timeZone,
             screen.pixelDepth.toString(),
             navigator.hardwareConcurrency.toString(),
-            // Add IP as a separate component for filtering but not as primary identifier
             this.ipAddress
         ];
 
@@ -231,10 +197,10 @@ class StableDeviceFingerprint {
             osVersion: this.getOSVersion(),
             device: this.getDevice(),
             deviceType: this.getDeviceType(),
+            isMobile: this.isMobile(),
             canvasFingerprint: this.getCanvasFingerprint(),
+            browserLanguage: this.getBrowserLanguage(),
             hardwareFeatures: this.getHardwareFeatures(),
-            pluginsCount: navigator.plugins.length,
-            pluginsList: Array.from(navigator.plugins, p => p.name).join(','),
             doNotTrack: navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             pixelDepth: screen.pixelDepth.toString(),
