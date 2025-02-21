@@ -4,29 +4,37 @@
   right: 30px !important;
 }
 
-/* The SVG container */
+/* SVG container enforcement */
 div.f6d0f86.f6d0f88 {
   width: 84px !important;
   height: 84px !important;
-  min-width: 84px !important;
-  min-height: 84px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-/* The SVG element itself - with forced dimensions */
-svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e {
+/* Direct SVG attributes override */
+div.f6d0f86.f6d0f88 svg {
   width: 84px !important;
   height: 84px !important;
   min-width: 84px !important;
   min-height: 84px !important;
+  transform: scale(2.625) !important;
+  transform-origin: center !important;
+  viewBox: 0 0 84 84 !important;
+  -webkit-transform: scale(2.625) !important;
+  -moz-transform: scale(2.625) !important;
+  -ms-transform: scale(2.625) !important;
   border-radius: 42px !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-/* The path inside SVG - ensure proper scaling */
-svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e path {
+/* Force SVG path scaling */
+div.f6d0f86.f6d0f88 svg path {
+  width: 84px !important;
+  height: 84px !important;
   transform-origin: center !important;
-  transform: scale(2.625) !important;
 }
 
 /* Image enforcement (if present instead of SVG) */
