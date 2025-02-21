@@ -13,20 +13,21 @@
 }
 
 /* Only apply transparent background when launcher is closed (image is visible) */
-.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(img[alt="open chat"]) {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e) {
   background-color: transparent !important;
   border: none !important;
 }
 
 /* Remove hover effects */
-.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(img[alt="open chat"]):hover {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e):hover {
   transform: none !important;
   opacity: 1 !important;
   background-color: transparent !important;
 }
 
-/* The actual image within the launcher */
-img[alt="open chat"].f6d0f8t.f6d0f8v.f6d0f8g {
+/* The actual SVG and image within the launcher */
+svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e,
+.f6d0f8t.f6d0f8v.f6d0f8g {
   width: 84px !important;
   height: 84px !important;
   border-radius: 42px !important;
@@ -35,7 +36,7 @@ img[alt="open chat"].f6d0f8t.f6d0f8v.f6d0f8g {
 }
 
 /* Styles for opened state */
-.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:not(:has(img[alt="open chat"])) {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:not(:has(svg.f6d0f81.f6d0f8n.f6d0f8q.f6d0f8e)) {
   width: 42px !important;
   height: 42px !important;
   background-color: #6EBC43 !important;
