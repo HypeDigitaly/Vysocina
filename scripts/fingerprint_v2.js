@@ -221,34 +221,32 @@ class StableDeviceFingerprint {
     }
 
     getAllComponents() {
+        // Create object with all components used in fingerprint calculation
         const components = {
-            ipAddress: this.ipAddress, // Add IP address to components
             cpu: this.getCPU(),
             currentResolution: this.getCurrentResolution(),
             availableResolution: this.getAvailableResolution(),
-            colorDepth: this.getColorDepth(),
+            colorDepth: this.getColorDepth().toString(),
             os: this.getOS(),
             osVersion: this.getOSVersion(),
             device: this.getDevice(),
             deviceType: this.getDeviceType(),
+            canvasFingerprint: this.getCanvasFingerprint(),
             hardwareFeatures: this.getHardwareFeatures(),
-            isMobile: this.isMobile(),
-            browserLanguage: this.getBrowserLanguage() // Added browser language as component
+            pluginsCount: navigator.plugins.length,
+            pluginsList: Array.from(navigator.plugins, p => p.name).join(','),
+            doNotTrack: navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            pixelDepth: screen.pixelDepth.toString(),
+            hardwareConcurrency: navigator.hardwareConcurrency.toString(),
+            ipAddress: this.ipAddress
         };
 
-        // Modify logging to include IP
-        console.log("Device Fingerprint Components:");
-        console.log("- IP Address:", components.ipAddress);
-        console.log("- CPU Architecture:", components.cpu);
-        console.log("- Screen Resolution:", components.currentResolution);
-        console.log("- Available Resolution:", components.availableResolution);
-        console.log("- Color Depth:", components.colorDepth);
-        console.log("- Operating System:", components.os);
-        console.log("- OS Version:", components.osVersion);
-        console.log("- Device Type:", components.deviceType);
-        console.log("- Hardware Features:", components.hardwareFeatures);
-        console.log("- Is Mobile:", components.isMobile);
-        console.log("- Browser Language:", components.browserLanguage);
+        // Log all components that go into fingerprint calculation
+        console.log("Components used in fingerprint calculation:");
+        Object.entries(components).forEach(([key, value]) => {
+            console.log(`- ${key}:`, value);
+        });
 
         return components;
     }
