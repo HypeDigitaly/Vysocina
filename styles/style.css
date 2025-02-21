@@ -1,11 +1,11 @@
 /* Main container positioning */
-._1emja3f9 {
+.vfrc-widget {
   bottom: 30px !important;
   right: 30px !important;
 }
 
 /* Button container - default state (when closed) */
-.vfrc-launcher.ojsd7i1 {
+.vfrc-button.vfrc-launcher {
   width: 84px !important;
   height: 84px !important;
   transition: none !important;
@@ -13,20 +13,20 @@
 }
 
 /* Only apply transparent background when launcher is closed (image is visible) */
-.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
+.vfrc-button.vfrc-launcher:has(img[alt="open chat"]) {
   background-color: transparent !important;
   border: none !important;
 }
 
 /* Remove hover effects */
-.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
+.vfrc-button.vfrc-launcher:has(img[alt="open chat"]):hover {
   transform: none !important;
   opacity: 1 !important;
   background-color: transparent !important;
 }
 
 /* The actual image within the launcher */
-.ojsd7it.ojsd7iv.ojsd7ig {
+.vfrc-launcher img[alt="open chat"] {
   width: 84px !important;
   height: 84px !important;
   border-radius: 42px !important;
@@ -35,7 +35,7 @@
 }
 
 /* Styles for opened state */
-.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
+.vfrc-button.vfrc-launcher:not(:has(img[alt="open chat"])) {
   width: 42px !important;
   height: 42px !important;
   background-color: #6EBC43 !important;
@@ -50,9 +50,9 @@
 
 /* Translation overlay styles - updated approach */
 /* Remove backgrounds and hide original text */
-.vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4,
-button[label="Start new chat"],
-button[label="Cancel"],
+.vfrc-button,
+.vfrc-start-chat-button,
+.vfrc-cancel-button,
 #vfrc-start-chat {
   background: transparent !important;
   border: none !important;
@@ -61,22 +61,22 @@ button[label="Cancel"],
 }
 
 /* Hide all original text contents */
-.vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4 span,
-button[label="Start new chat"] span,
-button[label="Cancel"] span,
+.vfrc-button span,
+.vfrc-start-chat-button span,
+.vfrc-cancel-button span,
 #vfrc-start-chat span {
   display: none !important;
 }
 
 /* Start new chat translation - all variations */
-button[label="Start new chat"],
+.vfrc-start-chat-button,
 #vfrc-start-chat {
   background-color: #6EBC43 !important;
   border-radius: 4px !important;
   padding: 10px 20px !important;
 }
 
-button[label="Start new chat"]::before,
+.vfrc-start-chat-button::before,
 #vfrc-start-chat::before {
   content: "Začít nový chat" !important;
   position: absolute !important;
@@ -92,13 +92,13 @@ button[label="Start new chat"]::before,
 }
 
 /* Cancel translation */
-button[label="Cancel"] {
+.vfrc-cancel-button {
   background-color: #f5f5f5 !important;
   border-radius: 4px !important;
   padding: 10px 20px !important;
 }
 
-button[label="Cancel"]::before {
+.vfrc-cancel-button::before {
   content: "Zavřít" !important;
   position: absolute !important;
   left: 50% !important;
@@ -130,29 +130,29 @@ button[label="Cancel"]::before {
   align-items: flex-start !important;
 }
 
-/* Aktualizovaný styl pro "Chat has ended" text */
-div[class*="1o69oyc2"] {
+/* Updated style for "Chat has ended" text */
+.vfrc-chat-ended {
   color: transparent !important;
   position: relative !important;
-  text-align: center !important;  /* Přidáno pro centrování */
-  width: 100% !important;  /* Zajistí plnou šířku pro centrování */
+  text-align: center !important;
+  width: 100% !important;
 }
 
-div[class*="1o69oyc2"]::before {
+.vfrc-chat-ended::before {
   content: "Chat byl ukončen" !important;
   position: absolute !important;
-  left: 50% !important;  /* Změněno z left: 0 na left: 50% */
+  left: 50% !important;
   top: 50% !important;
-  transform: translate(-50%, -50%) !important;  /* Přidáno -50% v ose X pro přesné centrování */
+  transform: translate(-50%, -50%) !important;
   color: #666666 !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
   font-family: "Open Sans", Arial, sans-serif !important;
   font-size: 14px !important;
-  font-weight: 600 !important;  /* Změněno na tučné písmo */
+  font-weight: 600 !important;
   line-height: 1.5 !important;
   letter-spacing: normal !important;
-  display: block !important;  /* Přidáno pro lepší centrování */
-  text-align: center !important;  /* Přidáno pro centrování */
+  display: block !important;
+  text-align: center !important;
 }
