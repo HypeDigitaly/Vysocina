@@ -34,8 +34,8 @@
   justify-content: center !important;
 }
 
-/* Styles for opened state */
-.vfrc-launcher.f6dof8t:not(:has(svg)) {
+/* Styles for opened state - button with arrow */
+.vfrc-launcher.f6dof8t:not(:has(.f6dof8t.f6dof8v.f6dof8g)) {
   width: 42px !important;
   height: 42px !important;
   background-color: #6EBC43 !important;
@@ -46,6 +46,26 @@
   transition: none !important;
   animation: none !important;
   transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Arrow SVG in opened state */
+.vfrc-launcher.f6dof8t:not(:has(.f6dof8t.f6dof8v.f6dof8g)) svg {
+  width: 24px !important;
+  height: 24px !important;
+  transform: none !important;
+  object-fit: contain !important;
+}
+
+/* Container for the arrow */
+.f6dof86.f6dof88:has(svg[viewBox="0 0 32 32"]) {
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Translation overlay styles - updated approach */
