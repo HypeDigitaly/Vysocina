@@ -14,13 +14,24 @@
   border: none !important;
 }
 
-/* SVG container when closed */
-.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 svg {
+/* Target both SVG and IMG when in closed state */
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 svg,
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 img.f6dof8t.f6dof8v.f6dof8g {
   width: 84px !important;
   height: 84px !important;
   border-radius: 42px !important;
   border: none !important;
   box-shadow: none !important;
+  transform: scale(2.625) !important; /* 84/32 = 2.625 to scale up from 32px to 84px */
+}
+
+/* Container for the image/svg */
+.f6dof86.f6dof88 {
+  width: 84px !important;
+  height: 84px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Styles for opened state */
