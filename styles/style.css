@@ -5,7 +5,7 @@
 }
 
 /* Button container - default state (when closed) */
-.vfrc-launcher.ojsd7i1 {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5 {
   width: 84px !important;
   height: 84px !important;
   transition: none !important;
@@ -13,20 +13,20 @@
 }
 
 /* Only apply transparent background when launcher is closed (image is visible) */
-.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig) {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(img[alt="open chat"]) {
   background-color: transparent !important;
   border: none !important;
 }
 
 /* Remove hover effects */
-.vfrc-launcher.ojsd7i1:has(.ojsd7it.ojsd7iv.ojsd7ig):hover {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:has(img[alt="open chat"]):hover {
   transform: none !important;
   opacity: 1 !important;
   background-color: transparent !important;
 }
 
 /* The actual image within the launcher */
-.ojsd7it.ojsd7iv.ojsd7ig {
+img[alt="open chat"].f6d0f8t.f6d0f8v.f6d0f8g {
   width: 84px !important;
   height: 84px !important;
   border-radius: 42px !important;
@@ -35,7 +35,7 @@
 }
 
 /* Styles for opened state */
-.vfrc-launcher.ojsd7i1:not(:has(.ojsd7it.ojsd7iv.ojsd7ig)) {
+.vfrc-button_1q15b0b0.c26d8a0._1q15b0b2.vfrc-launcher.f6d0f81._1q15b0b5:not(:has(img[alt="open chat"])) {
   width: 42px !important;
   height: 42px !important;
   background-color: #6EBC43 !important;
