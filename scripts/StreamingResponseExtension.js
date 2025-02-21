@@ -74,11 +74,12 @@ export const StreamingResponseExtension = {
     // Function to make Claude API call through proxy
     async function callClaudeAPI(payload) {
       try {
-        console.log('📤 Extension -> Proxy: Sending request', payload)
-        addDebugMessage('🌐 Connecting to Claude API via proxy...')
+        const proxyUrl = window.location.origin + '/api/claude-stream'
+        console.log('📤 Extension -> Proxy: Sending request to:', proxyUrl, payload)
+        addDebugMessage(`🌐 Connecting to Claude API via proxy: ${proxyUrl}`)
 
         // Call proxy endpoint
-        const response = await fetch('/api/claude-stream', {
+        const response = await fetch(proxyUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

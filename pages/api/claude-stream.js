@@ -4,7 +4,9 @@ import { Anthropic } from '@anthropic-ai/sdk'
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
 export default async function handler(req, res) {
-  console.log('🎯 Proxy: Received request from extension')
+  console.log('🎯 Proxy: Received request from extension at:', req.headers.host)
+  console.log('🔍 Request URL:', req.url)
+  console.log('🌐 Full URL:', `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}${req.url}`)
   
   if (req.method !== 'POST') {
     console.error('❌ Proxy: Invalid method', req.method)
