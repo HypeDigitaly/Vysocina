@@ -22,7 +22,7 @@
   border-radius: 42px !important;
   border: none !important;
   box-shadow: none !important;
-  transform: scale(2.625) !important; /* 84/32 = 2.625 to scale up from 32px to 84px */
+  object-fit: contain !important;
 }
 
 /* Container for the image/svg */
