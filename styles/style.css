@@ -1,63 +1,219 @@
+/* ================= RESET ALL BUTTON CONTAINERS FIRST ================= */
+/* Reset all button containers to remove potentially problematic default styling */
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5,
+button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5,
+.vfrc-launcher,
+.f6dof81,
+.f6dof87.f6dof89,
+.f6dof86.f6dof88,
+div.f6dof87.f6dof89,
+div.f6dof8m.f6dof8o.f6dof8r.f6dof8f,
+div.f6dof87.f6dof89 {
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* ================= MAIN CONTAINER STYLING (APPLIES TO BOTH STATES) ================= */
 /* Main container positioning */
 ._1emja3f9 {
-  bottom: 30px !important;
-  right: 30px !important;
+  position: fixed !important;
+  z-index: 9999 !important;
 }
 
-/* Button container - default state (when closed) */
-.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(.f6dof8t.f6dof8v.f6dof8g) {
-  width: 84px !important;
-  height: 84px !important;
-  transition: none !important;
-  animation: none !important;
+/* CLOSED STATE - specific positioning */
+._1emja3f9:has(img[alt="open chat"]),
+._1emja3f9:not(:has(#voiceflow-chat)) {
+  bottom: 15px !important;
+  right: 15px !important;
+}
+
+/* OPENED STATE - specific positioning */
+._1emja3f9:has(#voiceflow-chat) {
+  bottom: 0 !important;
+  right: 0 !important;
+}
+
+/* ================= CLOSED STATE STYLING ================= */
+/* Parent containers in closed state */
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(img[alt="open chat"]),
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(.f6dof8u.f6dof8w.f6dof8h) {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
   background-color: transparent !important;
   border: none !important;
+  border-radius: 50px !important;
+  overflow: visible !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: content-box !important;
+  transform: none !important;
+  position: fixed !important;
+  bottom: 15px !important;
+  right: 15px !important;
 }
 
-/* Target both SVG and IMG when in closed state */
-.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(.f6dof8t.f6dof8v.f6dof8g) img.f6dof8t.f6dof8v.f6dof8g {
-  width: 84px !important;
-  height: 84px !important;
-  border-radius: 42px !important;
-  border: none !important;
-  box-shadow: none !important;
-  object-fit: contain !important;
+/* Additional selectors for parent container in closed state */
+div.f6dof80:has(img[alt="open chat"]) {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
 }
 
-/* Container for the image/svg */
-.f6dof86.f6dof88 {
-  width: 84px !important;
-  height: 84px !important;
+/* Immediate image container in closed state */
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(img[alt="open chat"]) div.f6dof87.f6dof89,
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(img[alt="open chat"]) div.f6dof86.f6dof88 {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-/* POUZE PRO OTEVŘENÝ STAV - button s šipkou */
+/* Target the actual image in closed state */
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 img.f6dof8u.f6dof8w.f6dof8h,
+.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5 img[alt="open chat"] {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
+  border-radius: 50px !important;
+  border: 4px solid #6EBC43 !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: content-box !important;
+  transform: none !important;
+  aspect-ratio: 1/1 !important;
+}
+
+/* Keyframes for the image glow pulse */
+@keyframes pulseImageGlow {
+  0% {
+    box-shadow: 0 0 8px 2px rgba(110, 188, 67, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 16px 6px rgba(110, 188, 67, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px rgba(110, 188, 67, 0.6);
+  }
+}
+
+/* ================= OPENED STATE STYLING ================= */
+/* Main container in opened state */
+div._1emja3f9:has(#voiceflow-chat) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+}
+
+/* Button in opened state - INCREASED SIZE TO 42x42 FROM 36x36 */
 button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(svg[viewBox="0 0 32 32"]) {
   width: 42px !important;
   height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
   background-color: #6EBC43 !important;
   border-radius: 9999px !important;
-  margin-right: 0px !important;
-  position: relative !important;
   overflow: hidden !important;
-  transition: none !important;
-  animation: none !important;
   transform: none !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  margin-top: 15px !important;
+  margin-right: 15px !important;
+  margin-bottom: 15px !important;
+  position: relative !important; /* Override fixed position from the default */
+  bottom: auto !important; /* Override bottom from the default */
+  right: auto !important; /* Override right from the default */
 }
 
-/* POUZE šipka v otevřeném stavu */
+/* Additional selectors for parent container in opened state */
+div.f6dof80:has(svg[viewBox="0 0 32 32"]) {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
+}
+
+/* Container for svg in opened state */
+button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(svg[viewBox="0 0 32 32"]) div.f6dof87.f6dof89 {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
+}
+
+/* Arrow icon in opened state - INCREASED PROPORTIONALLY */
 button.vfrc-button._1q15b0b0.c26d8x0._1q15b0b2.vfrc-launcher.f6dof81._1q15b0b0.c26d8x0._1q15b0b5:has(svg[viewBox="0 0 32 32"]) svg {
-  width: 24px !important;
-  height: 24px !important;
+  width: 21px !important;
+  height: 21px !important;
   transform: none !important;
   object-fit: contain !important;
 }
 
+/* ================= BUTTON TEXT REPLACEMENT ================= */
+/* Replace "Open chat agent" with "Otevřít chatbot" */
+button[title="Open chat agent"] {
+  color: transparent !important;
+  position: relative !important;
+}
+
+button[title="Open chat agent"]::before {
+  content: "Otevřít chatbot" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* Replace "Close chat agent" with "Zavřít chatbot" */
+button[title="Close chat agent"] {
+  color: transparent !important;
+  position: relative !important;
+}
+
+button[title="Close chat agent"]::before {
+  content: "Zavřít chatbot" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* ================= OTHER STYLING ================= */
 /* Translation overlay styles - updated approach */
 /* Remove backgrounds and hide original text */
 .vfrc-button_lytjiy0_l7qb7gk0_lytjiv2_lytjiv4,
@@ -103,7 +259,7 @@ button[label="Start new chat"]::before,
 
 /* Cancel translation */
 button[label="Cancel"] {
-  background-color: #f5f5f5 !important;
+  background-color: #6EBC43 !important;
   border-radius: 4px !important;
   padding: 10px 20px !important;
 }
@@ -114,7 +270,7 @@ button[label="Cancel"]::before {
   left: 50% !important;
   top: 50% !important;
   transform: translate(-50%, -50%) !important;
-  color: #666 !important;
+  color: white !important;
   white-space: nowrap !important;
   pointer-events: none !important;
   z-index: 2 !important;
@@ -140,31 +296,64 @@ button[label="Cancel"]::before {
   align-items: flex-start !important;
 }
 
-/* Aktualizovaný styl pro "Chat has ended" text */
-div[class*="1o69oyc2"] {
-  color: transparent !important;
-  position: relative !important;
-  text-align: center !important;  /* Přidáno pro centrování */
-  width: 100% !important;  /* Zajistí plnou šířku pro centrování */
+/* Aggressive translation targeting for "Chat has ended" text */
+.t1cwqp2,
+div.t1cwqp2,
+.t1cwqp1,
+div.t1cwqp1,
+div[class^="t1cwqp"],
+div[class*="t1cwqp"] {
+    color: transparent !important;
+    font-size: 0 !important;
+    visibility: hidden !important;
+    position: relative !important;
+    display: block !important;
+    height: 30px !important;
+    width: 100% !important;
+    margin: 8px 0 !important;
 }
 
-div[class*="1o69oyc2"]::before {
-  content: "Chat byl ukončen" !important;
-  position: absolute !important;
-  left: 50% !important;  /* Změněno z left: 0 na left: 50% */
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;  /* Přidáno -50% v ose X pro přesné centrování */
-  color: #666666 !important;
-  white-space: nowrap !important;
-  pointer-events: none !important;
-  z-index: 2 !important;
-  font-family: "Open Sans", Arial, sans-serif !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;  /* Změněno na tučné písmo */
-  line-height: 1.5 !important;
-  letter-spacing: normal !important;
-  display: block !important;  /* Přidáno pro lepší centrování */
-  text-align: center !important;  /* Přidáno pro centrování */
+/* Target any potential child elements */
+.t1cwqp2 *,
+div.t1cwqp2 *,
+.t1cwqp1 *,
+div.t1cwqp1 *,
+div[class^="t1cwqp"] *,
+div[class*="t1cwqp"] * {
+    color: transparent !important;
+    font-size: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Insert translated text */
+.t1cwqp2::after,
+div.t1cwqp2::after,
+.t1cwqp1::after,
+div.t1cwqp1::after,
+div[class^="t1cwqp"]::after,
+div[class*="t1cwqp"]::after {
+    content: "Chat byl ukončen" !important;
+    visibility: visible !important;
+    color: #5F7CA0 !important;
+    font-family: "Open Sans", Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 100% !important;
+    display: block !important;
+}
+
+/* Remove all previous translation attempts */
+div[class*="t1cwqp"]::before,
+div:has(> span:only-child:contains("Chat has ended"))::before,
+div[class*="t1cwqp"] > span,
+div[class*="t1cwqp"] > div {
+    display: none !important;
 }
 
 /* ADDED TEXT ALIGNMENT FIX */
@@ -186,4 +375,38 @@ div[class*="streaming-response-container"] {
 .vfrc-message p,
 div[class*="vfrc-message"] * {
   text-align: left !important;
+}
+
+/* ================= PROACTIVE MESSAGE STYLING ================= */
+/* Adjust vertical position of the proactive message container */
+/* The original 'bottom: 100%' positions the bottom edge of this container
+   at the top edge of its parent. Adding margin-bottom pushes it further up. */
+._6r9xee0 {
+  margin-bottom: 60px !important; /* Move upwards by 50px */
+}
+
+/* Style the inner proactive message div for the animated border */
+div._6r9xee3.o231sh1 {
+  position: relative !important;
+  z-index: 0 !important;
+  border-radius: 10px !important;
+  background-color: #6EBC43 !important;
+  color: #1a1e23 !important;
+  opacity: 1 !important;
+
+  /* Restore ONLY scale pulse animation */
+  /* animation: pulseScale 1.8s ease-in-out infinite !important; */
+  transform-origin: center center !important;
+}
+
+/* Restore Keyframes for the pulsing scale */
+/* @keyframes pulseScale { ... } */
+
+/* REMOVE Keyframes for pulsing background color */
+/* @keyframes pulseColor { ... } */
+
+/* Ensure text inside is visible above the background color */
+div._6r9xee3.o231sh1 > * {
+    position: relative;
+    z-index: 1;
 }
