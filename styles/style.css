@@ -97,7 +97,7 @@ div.f6dof80:has(img[alt="open chat"]) {
   max-width: 100px !important;
   max-height: 100px !important;
   border-radius: 50px !important;
-  border: 4px solid #6EBC43 !important;
+  /* border: 4px solid #6EBC43 !important; */ /* Removed border */
   object-fit: contain !important;
   object-position: center !important;
   display: block !important;
@@ -109,17 +109,7 @@ div.f6dof80:has(img[alt="open chat"]) {
 }
 
 /* Keyframes for the image glow pulse */
-@keyframes pulseImageGlow {
-  0% {
-    box-shadow: 0 0 8px 2px rgba(110, 188, 67, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 16px 6px rgba(110, 188, 67, 0.8);
-  }
-  100% {
-    box-shadow: 0 0 8px 2px rgba(110, 188, 67, 0.6);
-  }
-}
+/* @keyframes pulseImageGlow { ... } */ /* Commented out as animation is removed */
 
 /* ================= OPENED STATE STYLING ================= */
 /* Main container in opened state */
